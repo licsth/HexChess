@@ -6,7 +6,7 @@ const Home: NextPage = () => {
   return (
     <div>
       <Head>
-        <title>Num Tic Tac Toe</title>
+        <title>HexChess</title>
       </Head>
       <Gameboard />
     </div>
