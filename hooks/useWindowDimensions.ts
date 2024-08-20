@@ -17,8 +17,8 @@ export const Breakpoints: Record<ScreenSize, number> = {
 };
 
 export default function useWindowDimensions() {
-  const [width, setWidth] = useState(window.innerWidth);
-  const [height, setHeight] = useState(window.innerHeight);
+  const [width, setWidth] = useState(0);
+  const [height, setHeight] = useState(0);
 
   function handleScreenResize() {
     setWidth(window.innerWidth);
@@ -26,6 +26,7 @@ export default function useWindowDimensions() {
   }
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     // the timeout is an absolutely stupid workaound for a Safari PWA bug: the resize event fires before the viewport is updated, so window.innerWidth and window.innerHeight will have wrong values
     window.addEventListener('resize', () => setTimeout(handleScreenResize, 50));
     handleScreenResize();
