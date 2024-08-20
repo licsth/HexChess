@@ -11,7 +11,7 @@ module.exports = {
       pattern: /bg-.*-[1-9]00/,
     },
     {
-      pattern: /border-.*-700/,
+      pattern: /border-.*-[1-9]00/,
     },
   ],
   plugins: [],
