@@ -7,6 +7,7 @@
   margin-right: -13px;
   margin-bottom: -25px;
 }
+
 .hex .left {
   float: left;
   width: 0;
@@ -15,11 +16,13 @@
   border-top: 26px solid transparent;
   border-bottom: 26px solid transparent;
 }
+
 .hex .middle {
   float: left;
   width: 30px;
   height: 52px;
 }
+
 .hex .right {
   float: left;
   width: 0;
@@ -27,4 +30,29 @@
   border-left-style: solid;
   border-top: 26px solid transparent;
   border-bottom: 26px solid transparent;
+}
+
+/* Media query for small screens */
+@media (max-width: 640px) {
+  .hex {
+    margin-right: -8.67px;
+    margin-bottom: -16.67px;
+  }
+
+  .hex .left {
+    border-right-width: 10px;
+    border-top: 17.33px solid transparent;
+    border-bottom: 17.33px solid transparent;
+  }
+
+  .hex .middle {
+    width: 20px;
+    height: 34.67px;
+  }
+
+  .hex .right {
+    border-left-width: 10px;
+    border-top: 17.33px solid transparent;
+    border-bottom: 17.33px solid transparent;
+  }
 }

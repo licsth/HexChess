@@ -1,7 +1,7 @@
 import { FunctionComponent, useEffect, useState } from "react";
 import { range } from "lodash";
-import React from "react";
 import { Hex } from "./Hex";
+import useWindowDimensions, { Breakpoints } from "../hooks/useWindowDimensions";
 
 const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
@@ -21,17 +21,22 @@ const tailwindColors = [
 export const Gameboard: FunctionComponent = ({}) => {
   const [color, setColor] = useState("slate");
 
+  const { width } = useWindowDimensions();
+
+  const rowOffset = width > Breakpoints.SM ? 30 : 20;
+  const columnOffset = width > Breakpoints.SM ? 51 : 34;
+
   return (
-    <div className="grid justify-center content-center h-screen bg-slate-800 overflow-hidden relative">
-      <div className="relative w-[560px] h-[660px]">
+    <div className="grid justify-center content-center h-screen bg-slate-800 overflow-hidden relative justify-items-center">
+      <div className="relative w-[374px] sm:w-[560px] h-[440px] sm:h-[660px]">
         {rows.map((rowLength, rowIndex) => (
           <div key={rowIndex}>
             {range(rowLength).map((i) => (
               <div
                 style={{
                   position: "absolute",
-                  top: `${(rowIndex + i + (rowIndex > 5 ? 11 - rowLength : 0)) * 30}px`,
-                  marginLeft: `${(i + (rowIndex > 5 ? 11 - rowLength : 0) - rowIndex) * 51 + 255}px`,
+                  top: `${(rowIndex + i + (rowIndex > 5 ? 11 - rowLength : 0)) * rowOffset}px`,
+                  marginLeft: `${(i + (rowIndex > 5 ? 11 - rowLength : 0) - rowIndex) * columnOffset + columnOffset * 5}px`,
                 }}
                 key={i}
               >
@@ -48,7 +53,7 @@ export const Gameboard: FunctionComponent = ({}) => {
           </div>
         ))}
       </div>
-      <div className="flex flex-col absolute right-0 top-0 gap-y-10 pt-5 pr-8">
+      <div className="flex sm:flex-col sm:absolute right-0 top-0 gap-y-10 pt-5 pr-8 flex-wrap sm:flex-nowrap gap-x-5 justify-center">
         {tailwindColors.map((color) => (
           <div
             key={color}
