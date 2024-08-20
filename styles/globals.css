@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.hex {
+  float: left;
+  margin-right: -13px;
+  margin-bottom: -25px;
+}
+.hex .left {
+  float: left;
+  width: 0;
+  border-right: 15px solid #6c6;
+  border-top: 26px solid transparent;
+  border-bottom: 26px solid transparent;
+}
+.hex .middle {
+  float: left;
+  width: 30px;
+  height: 52px;
+  background: #6c6;
+}
+.hex .right {
+  float: left;
+  width: 0;
+  border-left: 15px solid #6c6;
+  border-top: 26px solid transparent;
+  border-bottom: 26px solid transparent;
+}
