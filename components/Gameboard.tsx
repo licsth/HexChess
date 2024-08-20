@@ -50,7 +50,11 @@ export const Gameboard: FunctionComponent = ({}) => {
       </div>
       <div className="flex flex-col absolute right-0 top-0 gap-y-10 pt-5 pr-8">
         {tailwindColors.map((color) => (
-          <div key={color} className="" onClick={() => setColor(color)}>
+          <div
+            key={color}
+            className="cursor-pointer"
+            onClick={() => setColor(color)}
+          >
             <Hex variant={400} color={color} />
           </div>
         ))}
