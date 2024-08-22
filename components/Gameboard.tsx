@@ -2,6 +2,8 @@ import { FunctionComponent, useEffect, useState } from "react";
 import { range } from "lodash";
 import { Hex } from "./Hex";
 import useWindowDimensions, { Breakpoints } from "../hooks/useWindowDimensions";
+import { ChessPiece } from "../types/ChessPiece";
+import { blackStartPosition, whiteStartPosition } from "../types/startPosition";
 
 const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
@@ -26,30 +28,53 @@ export const Gameboard: FunctionComponent = ({}) => {
   const rowOffset = width > Breakpoints.SM ? 30 : 20;
   const columnOffset = width > Breakpoints.SM ? 51 : 34;
 
+  const [whitePieces, setWhitePieces] = useState<
+    {
+      type: ChessPiece;
+      x: number;
+      y: number;
+    }[]
+  >(whiteStartPosition.concat(blackStartPosition));
+
   return (
     <div className="grid justify-center content-center h-screen bg-slate-800 overflow-hidden relative justify-items-center">
       <div className="relative w-[374px] sm:w-[560px] h-[440px] sm:h-[660px]">
         {rows.map((rowLength, rowIndex) => (
           <div key={rowIndex}>
-            {range(rowLength).map((i) => (
-              <div
-                style={{
-                  position: "absolute",
-                  top: `${(rowIndex + i + (rowIndex > 5 ? 11 - rowLength : 0)) * rowOffset}px`,
-                  marginLeft: `${(i + (rowIndex > 5 ? 11 - rowLength : 0) - rowIndex) * columnOffset + columnOffset * 5}px`,
-                }}
-                key={i}
-              >
-                <Hex
-                  variant={
-                    variantRotation[
-                      (rowIndex + i + (rowIndex > 5 ? 11 - rowLength : 0)) % 3
-                    ]
-                  }
-                  color={color}
-                />
-              </div>
-            ))}
+            {range(rowLength).map((i) => {
+              const x = i + (rowIndex > 5 ? 11 - rowLength : 0);
+              const y = x - rowIndex + 5;
+              const piece = whitePieces.find(
+                (piece) => piece.x === x && piece.y === y
+              );
+              return (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: `${(rowIndex + i + (rowIndex > 5 ? 11 - rowLength : 0)) * rowOffset}px`,
+                    marginLeft: `${(i + (rowIndex > 5 ? 11 - rowLength : 0) - rowIndex) * columnOffset + columnOffset * 5}px`,
+                  }}
+                  key={i}
+                >
+                  <Hex
+                    variant={
+                      variantRotation[
+                        (rowIndex + i + (rowIndex > 5 ? 11 - rowLength : 0)) % 3
+                      ]
+                    }
+                    color={color}
+                  >
+                    {piece?.type === ChessPiece.PAWN && "P"}
+                    {piece?.type === ChessPiece.ROOK && "R"}
+                    {piece?.type === ChessPiece.KNIGHT && "N"}
+                    {piece?.type === ChessPiece.BISHOP && "B"}
+                    {piece?.type === ChessPiece.QUEEN && "Q"}
+                    {piece?.type === ChessPiece.KING && "K"}
+                    {/* {x} {y} */}
+                  </Hex>
+                </div>
+              );
+            })}
           </div>
         ))}
       </div>

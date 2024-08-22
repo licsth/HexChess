@@ -1,0 +1,51 @@
+import { ChessPiece } from "./ChessPiece";
+
+export const whiteStartPosition: {
+  type: ChessPiece,
+  x: number,
+  y: number,
+}[] = [
+    { type: ChessPiece.PAWN, x: 6, y: 1 },
+    { type: ChessPiece.PAWN, x: 6, y: 2 },
+    { type: ChessPiece.PAWN, x: 6, y: 3 },
+    { type: ChessPiece.PAWN, x: 6, y: 4 },
+    { type: ChessPiece.PAWN, x: 6, y: 5 },
+    { type: ChessPiece.PAWN, x: 7, y: 6 },
+    { type: ChessPiece.PAWN, x: 8, y: 7 },
+    { type: ChessPiece.PAWN, x: 9, y: 8 },
+    { type: ChessPiece.PAWN, x: 10, y: 9 },
+    { type: ChessPiece.ROOK, x: 7, y: 2 },
+    { type: ChessPiece.ROOK, x: 10, y: 8 },
+    { type: ChessPiece.BISHOP, x: 8, y: 5 },
+    { type: ChessPiece.BISHOP, x: 9, y: 5 },
+    { type: ChessPiece.BISHOP, x: 10, y: 5 },
+    { type: ChessPiece.KNIGHT, x: 8, y: 3 },
+    { type: ChessPiece.KNIGHT, x: 10, y: 7 },
+    { type: ChessPiece.QUEEN, x: 9, y: 4 },
+    { type: ChessPiece.KING, x: 10, y: 6 },
+  ]
+
+export const blackStartPosition: {
+  type: ChessPiece,
+  x: number,
+  y: number,
+}[] = [
+    { type: ChessPiece.PAWN, x: 0, y: 1 },
+    { type: ChessPiece.PAWN, x: 1, y: 2 },
+    { type: ChessPiece.PAWN, x: 2, y: 3 },
+    { type: ChessPiece.PAWN, x: 3, y: 4 },
+    { type: ChessPiece.PAWN, x: 4, y: 5 },
+    { type: ChessPiece.PAWN, x: 4, y: 6 },
+    { type: ChessPiece.PAWN, x: 4, y: 7 },
+    { type: ChessPiece.PAWN, x: 4, y: 8 },
+    { type: ChessPiece.PAWN, x: 4, y: 9 },
+    { type: ChessPiece.ROOK, x: 0, y: 2 },
+    { type: ChessPiece.ROOK, x: 3, y: 8 },
+    { type: ChessPiece.KNIGHT, x: 0, y: 3 },
+    { type: ChessPiece.KNIGHT, x: 2, y: 7 },
+    { type: ChessPiece.BISHOP, x: 0, y: 5 },
+    { type: ChessPiece.BISHOP, x: 1, y: 5 },
+    { type: ChessPiece.BISHOP, x: 2, y: 5 },
+    { type: ChessPiece.QUEEN, x: 0, y: 4 },
+    { type: ChessPiece.KING, x: 1, y: 6 },
+  ]
