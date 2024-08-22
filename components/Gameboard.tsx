@@ -7,59 +7,21 @@ import { blackStartPosition, whiteStartPosition } from "../types/startPosition";
 import { getPossibleNextPositions } from "../utilities/getPossibleNextPositions";
 import { getNextBotMove } from "../botLogic.ts/nextMove";
 import { updateBoardState } from "../utilities/updateBoardState";
+import { PositionedPiece } from "../types/positionedPiece";
+import { TailwindColor, tailwindColors } from "../types/tailwindColor";
+import { getAccentColorForBoardColor } from "../utilities/getAccentForBoardColor";
+import { ColorSelection } from "./ColorSelection";
 
 const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
-const tailwindColors = [
-  "red",
-  "orange",
-  "yellow",
-  "green",
-  "teal",
-  "blue",
-  "indigo",
-  "purple",
-  "pink",
-  "slate",
-];
-
-export interface Position {
-  x: number;
-  y: number;
-}
-
-export interface PositionedPiece extends Position {
-  type: ChessPiece;
-  color: PieceColor;
-}
 
 export const Gameboard: FunctionComponent = ({}) => {
-  const [color, setColor] = useState("slate");
+  const [color, setColor] = useState<TailwindColor>("slate");
   const [isPlayingAgainstBot, setIsPlayingAgainstBot] = useState(true);
-  const accentColor = useMemo(() => {
-    switch (color) {
-      case "red":
-        return "blue";
-      case "slate":
-        return "red";
-      case "orange":
-        return "blue";
-      case "yellow":
-        return "blue";
-      case "green":
-        return "red";
-      case "teal":
-        return "red";
-      case "blue":
-        return "red";
-      case "indigo":
-        return "red";
-      case "purple":
-        return "yellow";
-      case "pink":
-        return "blue";
-    }
-  }, [color]);
+  const accentColor = useMemo(
+    () => getAccentColorForBoardColor(color),
+    [color]
+  );
 
   const { width } = useWindowDimensions();
   const [currentPlayer, setCurrentPlayer] = useState(PieceColor.WHITE);
@@ -206,17 +168,7 @@ export const Gameboard: FunctionComponent = ({}) => {
           </div>
         ))}
       </div>
-      <div className="flex sm:flex-col sm:absolute right-0 top-0 gap-y-10 pt-5 pr-8 flex-wrap sm:flex-nowrap gap-x-5 justify-center">
-        {tailwindColors.map((color) => (
-          <div
-            key={color}
-            className="cursor-pointer"
-            onClick={() => setColor(color)}
-          >
-            <Hex variant={400} color={color} />
-          </div>
-        ))}
-      </div>
+      <ColorSelection setColor={setColor} />
     </div>
   );
 };

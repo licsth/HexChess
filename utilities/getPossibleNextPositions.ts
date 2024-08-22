@@ -1,5 +1,6 @@
-import { Position, PositionedPiece } from "../components/Gameboard";
 import { PieceColor } from "../types/ChessPiece";
+import { Position } from "../types/position";
+import { PositionedPiece } from "../types/positionedPiece";
 import { possibleMoves } from "../types/possibleMoves";
 
 /**

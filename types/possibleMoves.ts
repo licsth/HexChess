@@ -1,7 +1,7 @@
 import { range } from "lodash";
 import { ChessPiece, PieceColor } from "./ChessPiece";
-import { Position } from "../components/Gameboard";
 import { blackStartPosition, whiteStartPosition } from "./startPosition";
+import { Position } from "./position";
 
 export const possibleMoves: Record<ChessPiece, { x: number, y: number, constraint?: (currentPosition: Position, color: PieceColor, opponentOnField: boolean) => boolean }[][]> = {
   [ChessPiece.PAWN]: [

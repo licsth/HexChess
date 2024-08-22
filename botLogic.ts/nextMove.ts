@@ -1,4 +1,5 @@
-import { Position, PositionedPiece } from "../components/Gameboard";
+import { Position } from "../types/position";
+import { PositionedPiece } from "../types/positionedPiece";
 
 /**
  * Calculates the next move for the bot

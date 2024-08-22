@@ -1,5 +1,6 @@
-import { Position, PositionedPiece } from "../components/Gameboard";
 import { ChessPiece } from "../types/ChessPiece";
+import { Position } from "../types/position";
+import { PositionedPiece } from "../types/positionedPiece";
 
 export function updateBoardState(selectedPiece: PositionedPiece, targetPosition: Position, currentPlayerPieces: PositionedPiece[], otherPlayerPieces: PositionedPiece[]) {
   const isEndOfBoard =
