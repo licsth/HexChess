@@ -135,6 +135,8 @@ export const Gameboard: FunctionComponent = ({}) => {
                         selectedPiece?.color === PieceColor.WHITE
                           ? setBlackPieces
                           : setWhitePieces;
+                      const isEndOfBoard =
+                        x === 0 || x - y === 5 || y - x === 5 || x === 10;
                       // move the piece
                       setCurrentPlayerPieces((pieces) => {
                         const newPieces = pieces.filter(
@@ -142,7 +144,16 @@ export const Gameboard: FunctionComponent = ({}) => {
                             piece.x !== selectedPiece.x ||
                             piece.y !== selectedPiece.y
                         );
-                        newPieces.push({ ...selectedPiece, x, y });
+                        newPieces.push({
+                          ...selectedPiece,
+                          type:
+                            selectedPiece.type === ChessPiece.PAWN &&
+                            isEndOfBoard
+                              ? ChessPiece.QUEEN
+                              : selectedPiece.type,
+                          x,
+                          y,
+                        });
                         setSelectedPiece(null);
                         return newPieces;
                       });
