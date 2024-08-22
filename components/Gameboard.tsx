@@ -1,10 +1,11 @@
 import { FunctionComponent, useEffect, useMemo, useState } from "react";
-import { range } from "lodash";
+import { range, sum } from "lodash";
 import { Hex } from "./Hex";
 import useWindowDimensions, { Breakpoints } from "../hooks/useWindowDimensions";
 import { ChessPiece, PieceColor } from "../types/ChessPiece";
 import { blackStartPosition, whiteStartPosition } from "../types/startPosition";
 import { possibleMoves } from "../types/possibleMoves";
+import { getPossibleNextPositions } from "../utilities/getPossibleNextPositions";
 
 const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
@@ -26,7 +27,7 @@ export interface Position {
   y: number;
 }
 
-interface PositionedPiece extends Position {
+export interface PositionedPiece extends Position {
   type: ChessPiece;
   color: PieceColor;
 }
@@ -78,39 +79,20 @@ export const Gameboard: FunctionComponent = ({}) => {
 
   const possibleNextPositions = useMemo(() => {
     if (!selectedPiece) return [];
-    const moves = possibleMoves[selectedPiece.type];
-    const sign = selectedPiece.color === PieceColor.WHITE ? 1 : -1;
-    const res = [];
-    const ownPieces =
-      selectedPiece.color === PieceColor.WHITE ? whitePieces : blackPieces;
-    const otherPlayerPieces =
-      selectedPiece.color === PieceColor.WHITE ? blackPieces : whitePieces;
-    for (const moveList of moves) {
-      for (const move of moveList) {
-        const x = selectedPiece.x + sign * move.x;
-        const y = selectedPiece.y + sign * move.y;
-        const opponentOnField = otherPlayerPieces.some(
-          (piece) => piece.x === x && piece.y === y
-        );
-        if (
-          move.constraint &&
-          !move.constraint(selectedPiece, selectedPiece.color, opponentOnField)
-        )
-          break;
-        if (ownPieces.some((piece) => piece.x === x && piece.y === y)) {
-          break;
-        }
-        res.push({
-          x,
-          y,
-        });
-        if (opponentOnField) {
-          break;
-        }
-      }
-    }
-    return res;
+    return getPossibleNextPositions(selectedPiece, whitePieces, blackPieces);
   }, [selectedPiece]);
+
+  useEffect(() => {
+    console.log(
+      "Number of legal next moves:",
+      sum(
+        (currentPlayer === PieceColor.WHITE ? whitePieces : blackPieces).map(
+          (piece) =>
+            getPossibleNextPositions(piece, whitePieces, blackPieces).length
+        )
+      )
+    );
+  }, [currentPlayer]);
 
   return (
     <div className="grid justify-center content-center h-screen bg-slate-800 overflow-hidden relative justify-items-center">
