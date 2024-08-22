@@ -4,8 +4,9 @@ import { Hex } from "./Hex";
 import useWindowDimensions, { Breakpoints } from "../hooks/useWindowDimensions";
 import { ChessPiece, PieceColor } from "../types/ChessPiece";
 import { blackStartPosition, whiteStartPosition } from "../types/startPosition";
-import { possibleMoves } from "../types/possibleMoves";
 import { getPossibleNextPositions } from "../utilities/getPossibleNextPositions";
+import { getNextBotMove } from "../botLogic.ts/nextMove";
+import { updateBoardState } from "../utilities/updateBoardState";
 
 const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
@@ -34,6 +35,7 @@ export interface PositionedPiece extends Position {
 
 export const Gameboard: FunctionComponent = ({}) => {
   const [color, setColor] = useState("slate");
+  const [isPlayingAgainstBot, setIsPlayingAgainstBot] = useState(true);
   const accentColor = useMemo(() => {
     switch (color) {
       case "red":
@@ -127,45 +129,46 @@ export const Gameboard: FunctionComponent = ({}) => {
                         currentPlayer === piece?.color ? piece : null
                       );
                     else {
-                      const setCurrentPlayerPieces =
+                      const [currentPlayerPieces, setCurrentPlayerPieces] =
                         selectedPiece?.color === PieceColor.WHITE
-                          ? setWhitePieces
-                          : setBlackPieces;
-                      const setOtherPlayerPieces =
+                          ? [whitePieces, setWhitePieces]
+                          : [blackPieces, setBlackPieces];
+                      const [otherPlayerPieces, setOtherPlayerPieces] =
                         selectedPiece?.color === PieceColor.WHITE
-                          ? setBlackPieces
-                          : setWhitePieces;
-                      const isEndOfBoard =
-                        x === 0 || x - y === 5 || y - x === 5 || x === 10;
-                      // move the piece
-                      setCurrentPlayerPieces((pieces) => {
-                        const newPieces = pieces.filter(
-                          (piece) =>
-                            piece.x !== selectedPiece.x ||
-                            piece.y !== selectedPiece.y
+                          ? [blackPieces, setBlackPieces]
+                          : [whitePieces, setWhitePieces];
+                      let [newCurrentPlayerPieces, newOtherPlayerPieces] =
+                        updateBoardState(
+                          selectedPiece,
+                          { x, y },
+                          currentPlayerPieces,
+                          otherPlayerPieces
                         );
-                        newPieces.push({
-                          ...selectedPiece,
-                          type:
-                            selectedPiece.type === ChessPiece.PAWN &&
-                            isEndOfBoard
-                              ? ChessPiece.QUEEN
-                              : selectedPiece.type,
-                          x,
-                          y,
-                        });
-                        setSelectedPiece(null);
-                        return newPieces;
-                      });
-                      // remove other player's pieces on the new position
-                      setOtherPlayerPieces((pieces) =>
-                        pieces.filter((piece) => piece.x !== x || piece.y !== y)
-                      );
-                      setCurrentPlayer((currentPlayer) =>
-                        currentPlayer === PieceColor.WHITE
-                          ? PieceColor.BLACK
-                          : PieceColor.WHITE
-                      );
+                      setSelectedPiece(null);
+                      setCurrentPlayerPieces(newCurrentPlayerPieces);
+                      setOtherPlayerPieces(newOtherPlayerPieces);
+                      // switch player or let bot move
+                      if (isPlayingAgainstBot) {
+                        const [botSelectedPiece, botTargetPosition] =
+                          getNextBotMove(
+                            newOtherPlayerPieces,
+                            newCurrentPlayerPieces
+                          );
+                        [newOtherPlayerPieces, newCurrentPlayerPieces] =
+                          updateBoardState(
+                            botSelectedPiece,
+                            botTargetPosition,
+                            newOtherPlayerPieces,
+                            newCurrentPlayerPieces
+                          );
+                        setCurrentPlayerPieces(newCurrentPlayerPieces);
+                        setOtherPlayerPieces(newOtherPlayerPieces);
+                      } else
+                        setCurrentPlayer((currentPlayer) =>
+                          currentPlayer === PieceColor.WHITE
+                            ? PieceColor.BLACK
+                            : PieceColor.WHITE
+                        );
                     }
                   }}
                   key={i}
@@ -195,12 +198,6 @@ export const Gameboard: FunctionComponent = ({}) => {
                           : undefined
                     }
                   >
-                    {/* {piece?.type === ChessPiece.PAWN && "P"}
-                    {piece?.type === ChessPiece.ROOK && "R"}
-                    {piece?.type === ChessPiece.KNIGHT && "N"}
-                    {piece?.type === ChessPiece.BISHOP && "B"}
-                    {piece?.type === ChessPiece.QUEEN && "Q"}
-                    {piece?.type === ChessPiece.KING && "K"} */}
                     {/* {x} {y} */}
                   </Hex>
                 </div>
