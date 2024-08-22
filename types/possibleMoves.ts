@@ -3,15 +3,23 @@ import { ChessPiece, PieceColor } from "./ChessPiece";
 import { Position } from "../components/Gameboard";
 import { blackStartPosition, whiteStartPosition } from "./startPosition";
 
-export const possibleMoves: Record<ChessPiece, { x: number, y: number, constraint?: (currentPosition: Position, color: PieceColor) => boolean }[][]> = {
-  [ChessPiece.PAWN]: [[{ x: -1, y: 0 }, {
-    x: -2, y: 0, constraint: (position, color) => {
-      if (color === PieceColor.WHITE) {
-        return whiteStartPosition.some(piece => piece.type === ChessPiece.PAWN && position.x === piece.x && position.y === piece.y)
+export const possibleMoves: Record<ChessPiece, { x: number, y: number, constraint?: (currentPosition: Position, color: PieceColor, opponentOnField: boolean) => boolean }[][]> = {
+  [ChessPiece.PAWN]: [
+    [
+      { x: -1, y: 0, constraint: (_p, _c, opponentOnField) => !opponentOnField },
+      {
+        x: -2, y: 0, constraint: (position, color, opponentOnField) => {
+          if (opponentOnField) return false;
+          if (color === PieceColor.WHITE) {
+            return whiteStartPosition.some(piece => piece.type === ChessPiece.PAWN && position.x === piece.x && position.y === piece.y)
+          }
+          return blackStartPosition.some(piece => piece.type === ChessPiece.PAWN && position.x === piece.x && position.y === piece.y)
+        }
       }
-      return blackStartPosition.some(piece => piece.type === ChessPiece.PAWN && position.x === piece.x && position.y === piece.y)
-    }
-  }]],
+    ],
+    [{ x: 0, y: 1, constraint: (_p, _c, opponentOnField) => opponentOnField }],
+    [{ x: -1, y: -1, constraint: (_p, _c, opponentOnField) => opponentOnField }],
+  ],
   [ChessPiece.ROOK]: [
     range(10).map(i => ({ x: -(i + 1), y: 0 })),
     range(10).map(i => ({ x: (i + 1), y: 0 })),

@@ -87,13 +87,16 @@ export const Gameboard: FunctionComponent = ({}) => {
       selectedPiece.color === PieceColor.WHITE ? blackPieces : whitePieces;
     for (const moveList of moves) {
       for (const move of moveList) {
-        if (
-          move.constraint &&
-          !move.constraint(selectedPiece, selectedPiece.color)
-        )
-          break;
         const x = selectedPiece.x + sign * move.x;
         const y = selectedPiece.y + sign * move.y;
+        const opponentOnField = otherPlayerPieces.some(
+          (piece) => piece.x === x && piece.y === y
+        );
+        if (
+          move.constraint &&
+          !move.constraint(selectedPiece, selectedPiece.color, opponentOnField)
+        )
+          break;
         if (ownPieces.some((piece) => piece.x === x && piece.y === y)) {
           break;
         }
@@ -101,7 +104,7 @@ export const Gameboard: FunctionComponent = ({}) => {
           x,
           y,
         });
-        if (otherPlayerPieces.some((piece) => piece.x === x && piece.y === y)) {
+        if (opponentOnField) {
           break;
         }
       }
