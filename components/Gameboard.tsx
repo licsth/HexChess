@@ -34,7 +34,15 @@ export const Gameboard: FunctionComponent = ({}) => {
       x: number;
       y: number;
     }[]
-  >(whiteStartPosition.concat(blackStartPosition));
+  >(whiteStartPosition);
+
+  const [blackPieces, setBlackPieces] = useState<
+    {
+      type: ChessPiece;
+      x: number;
+      y: number;
+    }[]
+  >(blackStartPosition);
 
   return (
     <div className="grid justify-center content-center h-screen bg-slate-800 overflow-hidden relative justify-items-center">
@@ -44,7 +52,10 @@ export const Gameboard: FunctionComponent = ({}) => {
             {range(rowLength).map((i) => {
               const x = i + (rowIndex > 5 ? 11 - rowLength : 0);
               const y = x - rowIndex + 5;
-              const piece = whitePieces.find(
+              const whitePiece = whitePieces.find(
+                (piece) => piece.x === x && piece.y === y
+              );
+              const blackPiece = blackPieces.find(
                 (piece) => piece.x === x && piece.y === y
               );
               return (
@@ -63,13 +74,20 @@ export const Gameboard: FunctionComponent = ({}) => {
                       ]
                     }
                     color={color}
+                    piece={
+                      whitePiece
+                        ? { type: whitePiece.type, color: "white" }
+                        : blackPiece
+                          ? { type: blackPiece.type, color: "black" }
+                          : undefined
+                    }
                   >
-                    {piece?.type === ChessPiece.PAWN && "P"}
+                    {/* {piece?.type === ChessPiece.PAWN && "P"}
                     {piece?.type === ChessPiece.ROOK && "R"}
                     {piece?.type === ChessPiece.KNIGHT && "N"}
                     {piece?.type === ChessPiece.BISHOP && "B"}
                     {piece?.type === ChessPiece.QUEEN && "Q"}
-                    {piece?.type === ChessPiece.KING && "K"}
+                    {piece?.type === ChessPiece.KING && "K"} */}
                     {/* {x} {y} */}
                   </Hex>
                 </div>
