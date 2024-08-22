@@ -59,6 +59,45 @@ export const Gameboard: FunctionComponent = ({}) => {
     );
   }, [currentPlayer]);
 
+  function playPosition(x: number, y: number) {
+    if (!selectedPiece) return;
+    const [currentPlayerPieces, setCurrentPlayerPieces] =
+      selectedPiece?.color === PieceColor.WHITE
+        ? [whitePieces, setWhitePieces]
+        : [blackPieces, setBlackPieces];
+    const [otherPlayerPieces, setOtherPlayerPieces] =
+      selectedPiece?.color === PieceColor.WHITE
+        ? [blackPieces, setBlackPieces]
+        : [whitePieces, setWhitePieces];
+    let [newCurrentPlayerPieces, newOtherPlayerPieces] = updateBoardState(
+      selectedPiece,
+      { x, y },
+      currentPlayerPieces,
+      otherPlayerPieces
+    );
+    setSelectedPiece(null);
+    setCurrentPlayerPieces(newCurrentPlayerPieces);
+    setOtherPlayerPieces(newOtherPlayerPieces);
+    // switch player or let bot move
+    if (isPlayingAgainstBot) {
+      const [botSelectedPiece, botTargetPosition] = getNextBotMove(
+        newOtherPlayerPieces,
+        newCurrentPlayerPieces
+      );
+      [newOtherPlayerPieces, newCurrentPlayerPieces] = updateBoardState(
+        botSelectedPiece,
+        botTargetPosition,
+        newOtherPlayerPieces,
+        newCurrentPlayerPieces
+      );
+      setCurrentPlayerPieces(newCurrentPlayerPieces);
+      setOtherPlayerPieces(newOtherPlayerPieces);
+    } else
+      setCurrentPlayer((currentPlayer) =>
+        currentPlayer === PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE
+      );
+  }
+
   return (
     <div className="grid justify-center content-center h-screen bg-slate-800 overflow-hidden relative justify-items-center">
       <div className="relative w-[374px] sm:w-[560px] h-[440px] sm:h-[660px]">
@@ -92,46 +131,7 @@ export const Gameboard: FunctionComponent = ({}) => {
                         currentPlayer === piece?.color ? piece : null
                       );
                     else {
-                      const [currentPlayerPieces, setCurrentPlayerPieces] =
-                        selectedPiece?.color === PieceColor.WHITE
-                          ? [whitePieces, setWhitePieces]
-                          : [blackPieces, setBlackPieces];
-                      const [otherPlayerPieces, setOtherPlayerPieces] =
-                        selectedPiece?.color === PieceColor.WHITE
-                          ? [blackPieces, setBlackPieces]
-                          : [whitePieces, setWhitePieces];
-                      let [newCurrentPlayerPieces, newOtherPlayerPieces] =
-                        updateBoardState(
-                          selectedPiece,
-                          { x, y },
-                          currentPlayerPieces,
-                          otherPlayerPieces
-                        );
-                      setSelectedPiece(null);
-                      setCurrentPlayerPieces(newCurrentPlayerPieces);
-                      setOtherPlayerPieces(newOtherPlayerPieces);
-                      // switch player or let bot move
-                      if (isPlayingAgainstBot) {
-                        const [botSelectedPiece, botTargetPosition] =
-                          getNextBotMove(
-                            newOtherPlayerPieces,
-                            newCurrentPlayerPieces
-                          );
-                        [newOtherPlayerPieces, newCurrentPlayerPieces] =
-                          updateBoardState(
-                            botSelectedPiece,
-                            botTargetPosition,
-                            newOtherPlayerPieces,
-                            newCurrentPlayerPieces
-                          );
-                        setCurrentPlayerPieces(newCurrentPlayerPieces);
-                        setOtherPlayerPieces(newOtherPlayerPieces);
-                      } else
-                        setCurrentPlayer((currentPlayer) =>
-                          currentPlayer === PieceColor.WHITE
-                            ? PieceColor.BLACK
-                            : PieceColor.WHITE
-                        );
+                      playPosition(x, y);
                     }
                   }}
                   key={i}
