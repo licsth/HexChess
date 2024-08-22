@@ -6,3 +6,8 @@ export enum ChessPiece {
   QUEEN = 'queen',
   KING = 'king',
 }
+
+export enum PieceColor {
+  WHITE = 'white',
+  BLACK = 'black',
+}

@@ -1,13 +1,14 @@
 import { FunctionComponent, PropsWithChildren } from "react";
 import { classNames } from "../utilities/classNames";
-import { ChessPiece } from "../types/ChessPiece";
+import { ChessPiece, PieceColor } from "../types/ChessPiece";
 import useWindowDimensions, { Breakpoints } from "../hooks/useWindowDimensions";
 
 interface Props extends PropsWithChildren {
   className?: string;
   color?: string;
   variant: number;
-  piece?: { type: ChessPiece; color: "white" | "black" };
+  piece?: { type: ChessPiece; color: PieceColor };
+  hoverColor?: boolean;
 }
 
 export const Hex: FunctionComponent<Props> = ({
@@ -16,26 +17,30 @@ export const Hex: FunctionComponent<Props> = ({
   variant,
   children,
   piece,
+  hoverColor = false,
 }) => {
   const { width } = useWindowDimensions();
 
   return (
     <div
-      className={classNames("relative group", piece ? "cursor-pointer" : "")}
+      className={classNames(
+        "relative group",
+        hoverColor ? "cursor-pointer" : ""
+      )}
     >
       <div className={classNames("hex", className)}>
         <div
           className={classNames(
             "left",
             `border-${color}-${variant}`,
-            piece ? "group-hover:border-r-white" : ""
+            hoverColor ? "group-hover:border-r-white" : ""
           )}
         ></div>
         <div
           className={classNames(
             "middle",
             `bg-${color}-${variant}`,
-            piece ? "group-hover:bg-white" : ""
+            hoverColor ? "group-hover:bg-white" : ""
           )}
         >
           {children}
@@ -44,7 +49,7 @@ export const Hex: FunctionComponent<Props> = ({
           className={classNames(
             "right",
             `border-${color}-${variant}`,
-            piece ? "group-hover:border-l-white" : ""
+            hoverColor ? "group-hover:border-l-white" : ""
           )}
         ></div>
       </div>

@@ -1,9 +1,10 @@
-import { FunctionComponent, useEffect, useState } from "react";
+import { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { range } from "lodash";
 import { Hex } from "./Hex";
 import useWindowDimensions, { Breakpoints } from "../hooks/useWindowDimensions";
-import { ChessPiece } from "../types/ChessPiece";
+import { ChessPiece, PieceColor } from "../types/ChessPiece";
 import { blackStartPosition, whiteStartPosition } from "../types/startPosition";
+import { possibleMoves } from "../types/possibleMoves";
 
 const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
@@ -20,29 +21,87 @@ const tailwindColors = [
   "slate",
 ];
 
+interface Position {
+  x: number;
+  y: number;
+}
+
+interface PositionedPiece extends Position {
+  type: ChessPiece;
+  color: PieceColor;
+}
+
 export const Gameboard: FunctionComponent = ({}) => {
   const [color, setColor] = useState("slate");
+  const accentColor = useMemo(() => {
+    switch (color) {
+      case "red":
+        return "blue";
+      case "slate":
+        return "red";
+      case "orange":
+        return "blue";
+      case "yellow":
+        return "blue";
+      case "green":
+        return "red";
+      case "teal":
+        return "red";
+      case "blue":
+        return "red";
+      case "indigo":
+        return "red";
+      case "purple":
+        return "yellow";
+      case "pink":
+        return "blue";
+    }
+  }, [color]);
 
   const { width } = useWindowDimensions();
 
   const rowOffset = width > Breakpoints.SM ? 30 : 20;
   const columnOffset = width > Breakpoints.SM ? 51 : 34;
 
-  const [whitePieces, setWhitePieces] = useState<
-    {
-      type: ChessPiece;
-      x: number;
-      y: number;
-    }[]
-  >(whiteStartPosition);
+  const [whitePieces, setWhitePieces] = useState<PositionedPiece[]>(
+    whiteStartPosition.map((piece) => ({ ...piece, color: PieceColor.WHITE }))
+  );
 
-  const [blackPieces, setBlackPieces] = useState<
-    {
-      type: ChessPiece;
-      x: number;
-      y: number;
-    }[]
-  >(blackStartPosition);
+  const [blackPieces, setBlackPieces] = useState<PositionedPiece[]>(
+    blackStartPosition.map((piece) => ({ ...piece, color: PieceColor.BLACK }))
+  );
+
+  const [selectedPiece, setSelectedPiece] = useState<PositionedPiece | null>(
+    null
+  );
+
+  const possibleNextPositions = useMemo(() => {
+    if (!selectedPiece) return [];
+    const moves = possibleMoves[selectedPiece.type];
+    const sign = selectedPiece.color === PieceColor.WHITE ? 1 : -1;
+    const res = [];
+    const ownPieces =
+      selectedPiece.color === PieceColor.WHITE ? whitePieces : blackPieces;
+    const otherPlayerPieces =
+      selectedPiece.color === PieceColor.WHITE ? blackPieces : whitePieces;
+    for (const moveList of moves) {
+      for (const move of moveList) {
+        const x = selectedPiece.x + sign * move.x;
+        const y = selectedPiece.y + sign * move.y;
+        if (ownPieces.some((piece) => piece.x === x && piece.y === y)) {
+          break;
+        }
+        res.push({
+          x,
+          y,
+        });
+        if (otherPlayerPieces.some((piece) => piece.x === x && piece.y === y)) {
+          break;
+        }
+      }
+    }
+    return res;
+  }, [selectedPiece]);
 
   return (
     <div className="grid justify-center content-center h-screen bg-slate-800 overflow-hidden relative justify-items-center">
@@ -58,6 +117,11 @@ export const Gameboard: FunctionComponent = ({}) => {
               const blackPiece = blackPieces.find(
                 (piece) => piece.x === x && piece.y === y
               );
+              const isSelected =
+                selectedPiece?.x === x && selectedPiece?.y === y;
+              const isPossibleNextPosition = possibleNextPositions.some(
+                (position) => position.x === x && position.y === y
+              );
               return (
                 <div
                   style={{
@@ -65,20 +129,33 @@ export const Gameboard: FunctionComponent = ({}) => {
                     top: `${(rowIndex + i + (rowIndex > 5 ? 11 - rowLength : 0)) * rowOffset}px`,
                     marginLeft: `${(i + (rowIndex > 5 ? 11 - rowLength : 0) - rowIndex) * columnOffset + columnOffset * 5}px`,
                   }}
+                  onClick={() => {
+                    setSelectedPiece(whitePiece || blackPiece || null);
+                  }}
                   key={i}
                 >
                   <Hex
                     variant={
-                      variantRotation[
-                        (rowIndex + i + (rowIndex > 5 ? 11 - rowLength : 0)) % 3
-                      ]
+                      isSelected
+                        ? 600
+                        : isPossibleNextPosition
+                          ? 400
+                          : variantRotation[
+                              (rowIndex +
+                                i +
+                                (rowIndex > 5 ? 11 - rowLength : 0)) %
+                                3
+                            ]
                     }
-                    color={color}
+                    color={
+                      isSelected || isPossibleNextPosition ? accentColor : color
+                    }
+                    hoverColor={!isSelected}
                     piece={
                       whitePiece
-                        ? { type: whitePiece.type, color: "white" }
+                        ? { type: whitePiece.type, color: PieceColor.WHITE }
                         : blackPiece
-                          ? { type: blackPiece.type, color: "black" }
+                          ? { type: blackPiece.type, color: PieceColor.BLACK }
                           : undefined
                     }
                   >
