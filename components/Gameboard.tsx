@@ -130,7 +130,33 @@ export const Gameboard: FunctionComponent = ({}) => {
                     marginLeft: `${(i + (rowIndex > 5 ? 11 - rowLength : 0) - rowIndex) * columnOffset + columnOffset * 5}px`,
                   }}
                   onClick={() => {
-                    setSelectedPiece(whitePiece || blackPiece || null);
+                    if (!isPossibleNextPosition || !selectedPiece)
+                      setSelectedPiece(whitePiece || blackPiece || null);
+                    else {
+                      const setCurrentPlayerPieces =
+                        selectedPiece?.color === PieceColor.WHITE
+                          ? setWhitePieces
+                          : setBlackPieces;
+                      const setOtherPlayerPieces =
+                        selectedPiece?.color === PieceColor.WHITE
+                          ? setBlackPieces
+                          : setWhitePieces;
+                      // move the piece
+                      setCurrentPlayerPieces((pieces) => {
+                        const newPieces = pieces.filter(
+                          (piece) =>
+                            piece.x !== selectedPiece.x ||
+                            piece.y !== selectedPiece.y
+                        );
+                        newPieces.push({ ...selectedPiece, x, y });
+                        setSelectedPiece(null);
+                        return newPieces;
+                      });
+                      // remove other player's pieces on the new position
+                      setOtherPlayerPieces((pieces) =>
+                        pieces.filter((piece) => piece.x !== x || piece.y !== y)
+                      );
+                    }
                   }}
                   key={i}
                 >
