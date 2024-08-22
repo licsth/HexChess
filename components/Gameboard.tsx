@@ -21,7 +21,7 @@ const tailwindColors = [
   "slate",
 ];
 
-interface Position {
+export interface Position {
   x: number;
   y: number;
 }
@@ -86,6 +86,11 @@ export const Gameboard: FunctionComponent = ({}) => {
       selectedPiece.color === PieceColor.WHITE ? blackPieces : whitePieces;
     for (const moveList of moves) {
       for (const move of moveList) {
+        if (
+          move.constraint &&
+          !move.constraint(selectedPiece, selectedPiece.color)
+        )
+          break;
         const x = selectedPiece.x + sign * move.x;
         const y = selectedPiece.y + sign * move.y;
         if (ownPieces.some((piece) => piece.x === x && piece.y === y)) {
