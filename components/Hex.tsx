@@ -20,14 +20,32 @@ export const Hex: FunctionComponent<Props> = ({
   const { width } = useWindowDimensions();
 
   return (
-    <div className="relative">
+    <div
+      className={classNames("relative group", piece ? "cursor-pointer" : "")}
+    >
       <div className={classNames("hex", className)}>
-        <div className={classNames("left", `border-${color}-${variant}`)}></div>
-        <div className={classNames("middle", `bg-${color}-${variant}`)}>
+        <div
+          className={classNames(
+            "left",
+            `border-${color}-${variant}`,
+            piece ? "group-hover:border-r-white" : ""
+          )}
+        ></div>
+        <div
+          className={classNames(
+            "middle",
+            `bg-${color}-${variant}`,
+            piece ? "group-hover:bg-white" : ""
+          )}
+        >
           {children}
         </div>
         <div
-          className={classNames("right", `border-${color}-${variant}`)}
+          className={classNames(
+            "right",
+            `border-${color}-${variant}`,
+            piece ? "group-hover:border-l-white" : ""
+          )}
         ></div>
       </div>
       {piece && (
