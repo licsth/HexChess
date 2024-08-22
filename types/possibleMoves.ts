@@ -4,7 +4,7 @@ import { Position } from "../components/Gameboard";
 import { blackStartPosition, whiteStartPosition } from "./startPosition";
 
 export const possibleMoves: Record<ChessPiece, { x: number, y: number, constraint?: (currentPosition: Position, color: PieceColor) => boolean }[][]> = {
-  [ChessPiece.PAWN]: [[{ x: -1, y: 0 }], [{
+  [ChessPiece.PAWN]: [[{ x: -1, y: 0 }, {
     x: -2, y: 0, constraint: (position, color) => {
       if (color === PieceColor.WHITE) {
         return whiteStartPosition.some(piece => piece.type === ChessPiece.PAWN && position.x === piece.x && position.y === piece.y)

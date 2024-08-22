@@ -59,6 +59,7 @@ export const Gameboard: FunctionComponent = ({}) => {
   }, [color]);
 
   const { width } = useWindowDimensions();
+  const [currentPlayer, setCurrentPlayer] = useState(PieceColor.WHITE);
 
   const rowOffset = width > Breakpoints.SM ? 30 : 20;
   const columnOffset = width > Breakpoints.SM ? 51 : 34;
@@ -122,6 +123,7 @@ export const Gameboard: FunctionComponent = ({}) => {
               const blackPiece = blackPieces.find(
                 (piece) => piece.x === x && piece.y === y
               );
+              const piece = whitePiece || blackPiece || null;
               const isSelected =
                 selectedPiece?.x === x && selectedPiece?.y === y;
               const isPossibleNextPosition = possibleNextPositions.some(
@@ -136,7 +138,9 @@ export const Gameboard: FunctionComponent = ({}) => {
                   }}
                   onClick={() => {
                     if (!isPossibleNextPosition || !selectedPiece)
-                      setSelectedPiece(whitePiece || blackPiece || null);
+                      setSelectedPiece(
+                        currentPlayer === piece?.color ? piece : null
+                      );
                     else {
                       const setCurrentPlayerPieces =
                         selectedPiece?.color === PieceColor.WHITE
@@ -160,6 +164,11 @@ export const Gameboard: FunctionComponent = ({}) => {
                       // remove other player's pieces on the new position
                       setOtherPlayerPieces((pieces) =>
                         pieces.filter((piece) => piece.x !== x || piece.y !== y)
+                      );
+                      setCurrentPlayer((currentPlayer) =>
+                        currentPlayer === PieceColor.WHITE
+                          ? PieceColor.BLACK
+                          : PieceColor.WHITE
                       );
                     }
                   }}
