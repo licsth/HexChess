@@ -14,11 +14,11 @@ import { ColorSelection } from "./ColorSelection";
 
 const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
-const showCoordinates = true;
+const showCoordinates = false;
 
 export const Gameboard: FunctionComponent = ({ }) => {
   const [color, setColor] = useState<TailwindColor>("slate");
-  const [isPlayingAgainstBot, setIsPlayingAgainstBot] = useState(false);
+  const [isPlayingAgainstBot, setIsPlayingAgainstBot] = useState(true);
   const accentColor = useMemo(
     () => getAccentColorForBoardColor(color),
     [color]
@@ -44,7 +44,7 @@ export const Gameboard: FunctionComponent = ({ }) => {
 
   const possibleNextPositions = useMemo(() => {
     if (!selectedPiece) return [];
-    return getPossibleNextPositions(selectedPiece, whitePieces, blackPieces);
+    return getPossibleNextPositions(selectedPiece, whitePieces.concat(blackPieces));
   }, [selectedPiece]);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export const Gameboard: FunctionComponent = ({ }) => {
       sum(
         (currentPlayer === PieceColor.WHITE ? whitePieces : blackPieces).map(
           (piece) =>
-            getPossibleNextPositions(piece, whitePieces, blackPieces).length
+            getPossibleNextPositions(piece, whitePieces.concat(blackPieces)).length
         )
       )
     );
@@ -79,10 +79,10 @@ export const Gameboard: FunctionComponent = ({ }) => {
     setCurrentPlayerPieces(newCurrentPlayerPieces);
     setOtherPlayerPieces(newOtherPlayerPieces);
     // switch player or let bot move
+    // TODO: bot can only be black currently
     if (isPlayingAgainstBot) {
       const [botSelectedPiece, botTargetPosition] = getNextBotMove(
-        newOtherPlayerPieces,
-        newCurrentPlayerPieces
+        newOtherPlayerPieces.concat(newCurrentPlayerPieces), PieceColor.BLACK
       );
       [newOtherPlayerPieces, newCurrentPlayerPieces] = updateBoardState(
         botSelectedPiece,

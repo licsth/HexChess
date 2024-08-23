@@ -3,11 +3,8 @@ import { ChessPiece, PieceColor } from "./ChessPiece";
 import { blackStartPosition, whiteStartPosition } from "./startPosition";
 import { Position } from "./position";
 
-function kingConstraint(currentPosition: Position, color: PieceColor, opponentOnField: boolean, fieldThreat: boolean) {
-  return !fieldThreat;
-}
 
-export const possibleMoves: Record<ChessPiece, { x: number, y: number, constraint?: (currentPosition: Position, color: PieceColor, opponentOnField: boolean, fieldThreat: boolean) => boolean }[][]> = {
+export const possibleMoves: Record<ChessPiece, { x: number, y: number, constraint?: (currentPosition: Position, color: PieceColor, opponentOnField: boolean) => boolean }[][]> = {
   [ChessPiece.PAWN]: [
     [
       { x: -1, y: 0, constraint: (_p, _c, opponentOnField) => !opponentOnField },
@@ -56,18 +53,18 @@ export const possibleMoves: Record<ChessPiece, { x: number, y: number, constrain
   ],
   [ChessPiece.QUEEN]: [],
   [ChessPiece.KING]: [
-    [{ x: -1, y: 0, constraint: kingConstraint }],
-    [{ x: -1, y: 1, constraint: kingConstraint }],
-    [{ x: 0, y: 1, constraint: kingConstraint }],
-    [{ x: 1, y: 1, constraint: kingConstraint }],
-    [{ x: 1, y: 0, constraint: kingConstraint }],
-    [{ x: 1, y: -1, constraint: kingConstraint }],
-    [{ x: 0, y: -1, constraint: kingConstraint }],
-    [{ x: -1, y: -1, constraint: kingConstraint }],
-    [{ x: -2, y: -1, constraint: kingConstraint }],
-    [{ x: 2, y: 1, constraint: kingConstraint }],
-    [{ x: -1, y: -2, constraint: kingConstraint }],
-    [{ x: 1, y: 2, constraint: kingConstraint }]
+    [{ x: -1, y: 0 }],
+    [{ x: -1, y: 1 }],
+    [{ x: 0, y: 1 }],
+    [{ x: 1, y: 1 }],
+    [{ x: 1, y: 0 }],
+    [{ x: 1, y: -1 }],
+    [{ x: 0, y: -1 }],
+    [{ x: -1, y: -1 }],
+    [{ x: -2, y: -1 }],
+    [{ x: 2, y: 1 }],
+    [{ x: -1, y: -2 }],
+    [{ x: 1, y: 2 }]
   ]
 }
 
