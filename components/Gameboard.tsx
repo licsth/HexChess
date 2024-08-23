@@ -16,9 +16,9 @@ const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
 const showCoordinates = false;
 
-export const Gameboard: FunctionComponent = ({}) => {
+export const Gameboard: FunctionComponent = ({ }) => {
   const [color, setColor] = useState<TailwindColor>("slate");
-  const [isPlayingAgainstBot, setIsPlayingAgainstBot] = useState(false);
+  const [isPlayingAgainstBot, setIsPlayingAgainstBot] = useState(true);
   const accentColor = useMemo(
     () => getAccentColorForBoardColor(color),
     [color]
@@ -143,11 +143,11 @@ export const Gameboard: FunctionComponent = ({}) => {
                         : isPossibleNextPosition
                           ? 400
                           : variantRotation[
-                              (rowIndex +
-                                i +
-                                (rowIndex > 5 ? 11 - rowLength : 0)) %
-                                3
-                            ]
+                          (rowIndex +
+                            i +
+                            (rowIndex > 5 ? 11 - rowLength : 0)) %
+                          3
+                          ]
                     }
                     color={
                       isSelected || isPossibleNextPosition ? accentColor : color

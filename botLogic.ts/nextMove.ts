@@ -1,5 +1,6 @@
 import { Position } from "../types/position";
 import { PositionedPiece } from "../types/positionedPiece";
+import { getPossibleNextPositions } from "../utilities/getPossibleNextPositions";
 
 /**
  * Calculates the next move for the bot
@@ -8,6 +9,14 @@ import { PositionedPiece } from "../types/positionedPiece";
  * @returns the piece to move and the target position
  */
 export function getNextBotMove(botPieces: PositionedPiece[], opponentPieces: PositionedPiece[]): [PositionedPiece, Position] {
-  // dummy output: just don't move 
-  return [botPieces[0], botPieces[0]];
+  let move = undefined;
+  let botPiece = botPieces[Math.floor(Math.random() * botPieces.length)]
+  while (move === undefined) {
+    botPiece = botPieces[Math.floor(Math.random() * botPieces.length)];
+    const moves = getPossibleNextPositions(botPiece, opponentPieces, botPieces);
+    if (moves.length > 0) {
+      move = moves[Math.floor(Math.random() * moves.length)];
+    }
+  }
+  return [botPiece, move];
 }
