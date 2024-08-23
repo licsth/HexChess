@@ -21,6 +21,10 @@ export function getPossibleNextPositions(selectedPiece: PositionedPiece, whitePi
     for (const move of moveList) {
       const x = selectedPiece.x + sign * move.x;
       const y = selectedPiece.y + sign * move.y;
+      // check field is on the board
+      if (y > x + 5) continue;
+      if (y > 10 || x > 10 || y < 0 || x < 0) continue;
+      if (x > 5 && y < x - 5) continue;
       const opponentOnField = otherPlayerPieces.some(
         (piece) => piece.x === x && piece.y === y
       );
