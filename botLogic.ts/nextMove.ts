@@ -44,8 +44,12 @@ function oneMoveLookAhead(pieces: PositionedPiece[], botColor: PieceColor): [Pos
   let bestScore = -2000;
   let bestMove: [PositionedPiece, Position] = [pieces[0], { x: 0, y: 0 }];
   for (const [piece, move] of getAllLegalMoves(pieces, botColor)) {
-    //TODO newPiecs does not consider promotion yet.
-    const newPieces = pieces.filter((p) => p.x != move.x || p.y != move.y).map((p) => p === piece ? { ...p, x: move.x, y: move.y } : p);
+    const newPieces = pieces.filter((p) => p.x != move.x || p.y != move.y) //remove captured piece
+      .map((p) => p === piece ? { ...p, x: move.x, y: move.y } : p) // move piece
+      .map((p) => p.type === ChessPiece.PAWN && // check for promotion
+        ((p.color === PieceColor.WHITE && (p.x === 0 || p.y - p.x === 5))
+          || (p.color === PieceColor.BLACK && (p.x === 10 || p.x - p.y === 5)))
+        ? { ...p, type: ChessPiece.QUEEN } : p);
     const score = basicEvaluatePosition(newPieces, botColor);
     if ((score == bestScore && Math.random() > 0.5) || score > bestScore) {
       bestScore = score;

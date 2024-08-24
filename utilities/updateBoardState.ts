@@ -1,10 +1,10 @@
-import { ChessPiece } from "../types/ChessPiece";
+import { ChessPiece, PieceColor } from "../types/ChessPiece";
 import { Position } from "../types/position";
 import { PositionedPiece } from "../types/positionedPiece";
 
 export function updateBoardState(selectedPiece: PositionedPiece, targetPosition: Position, currentPlayerPieces: PositionedPiece[], otherPlayerPieces: PositionedPiece[]) {
-  const isEndOfBoard =
-    targetPosition.x === 0 || targetPosition.x - targetPosition.y === 5 || targetPosition.y - targetPosition.x === 5 || targetPosition.x === 10;
+  const isWhitePromotionField = targetPosition.x === 0 || targetPosition.y - targetPosition.x === 5;
+  const isBlackPromotionField = targetPosition.x - targetPosition.y === 5 || targetPosition.x === 10;
   // move the piece
   const newCurrentPlayerPIeces = currentPlayerPieces.filter(
     (piece) =>
@@ -15,7 +15,8 @@ export function updateBoardState(selectedPiece: PositionedPiece, targetPosition:
     ...selectedPiece,
     type:
       selectedPiece.type === ChessPiece.PAWN &&
-        isEndOfBoard
+        (isWhitePromotionField && selectedPiece.color === PieceColor.WHITE
+          || isBlackPromotionField && selectedPiece.color === PieceColor.BLACK)
         ? ChessPiece.QUEEN
         : selectedPiece.type,
     x: targetPosition.x,
