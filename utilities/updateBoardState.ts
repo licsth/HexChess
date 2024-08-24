@@ -2,16 +2,26 @@ import { ChessPiece, PieceColor } from "../types/ChessPiece";
 import { Position } from "../types/position";
 import { PositionedPiece } from "../types/positionedPiece";
 
-export function updateBoardState(selectedPiece: PositionedPiece, targetPosition: Position, currentPlayerPieces: PositionedPiece[], otherPlayerPieces: PositionedPiece[]) {
+export function updateBoardState(selectedPiece: PositionedPiece, targetPosition: Position, pieces: PositionedPiece[]) {
   const isWhitePromotionField = targetPosition.x === 0 || targetPosition.y - targetPosition.x === 5;
   const isBlackPromotionField = targetPosition.x - targetPosition.y === 5 || targetPosition.x === 10;
-  // move the piece
-  const newCurrentPlayerPieces = currentPlayerPieces.filter(
+  // remove the piece from its current position
+  let newPieces = pieces.filter(
     (piece) =>
       piece.x !== selectedPiece.x ||
       piece.y !== selectedPiece.y
   );
-  newCurrentPlayerPieces.push({
+  // remove captured piece
+  const capture = pieces.some(
+    (piece) =>
+      piece.x === targetPosition.x && piece.y === targetPosition.y && piece.color !== selectedPiece.color
+  );
+  newPieces = newPieces.filter(
+    (piece) =>
+      !(piece.x === targetPosition.x && piece.y === targetPosition.y && piece.color !== selectedPiece.color)
+  );
+  // add piece to new position
+  newPieces.push({
     ...selectedPiece,
     type:
       selectedPiece.type === ChessPiece.PAWN &&
@@ -22,9 +32,6 @@ export function updateBoardState(selectedPiece: PositionedPiece, targetPosition:
     x: targetPosition.x,
     y: targetPosition.y,
   });
-  const capture = otherPlayerPieces.some(
-    (piece) =>
-      piece.x === targetPosition.x && piece.y === targetPosition.y
-  );
-  return { newCurrent: newCurrentPlayerPieces, newOther: otherPlayerPieces.filter((piece) => piece.x !== targetPosition.x || piece.y !== targetPosition.y), capture }
+
+  return { newPieces, capture }
 }

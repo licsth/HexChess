@@ -39,12 +39,15 @@ export const Gameboard: FunctionComponent = ({}) => {
   const rowOffset = width > Breakpoints.SM ? 30 : 20;
   const columnOffset = width > Breakpoints.SM ? 51 : 34;
 
-  const [whitePieces, setWhitePieces] = useState<PositionedPiece[]>(
-    whiteStartPosition.map((piece) => ({ ...piece, color: PieceColor.WHITE }))
-  );
-
-  const [blackPieces, setBlackPieces] = useState<PositionedPiece[]>(
-    blackStartPosition.map((piece) => ({ ...piece, color: PieceColor.BLACK }))
+  const [pieces, setPieces] = useState<PositionedPiece[]>(
+    blackStartPosition
+      .map((piece) => ({ ...piece, color: PieceColor.BLACK }))
+      .concat(
+        whiteStartPosition.map((piece) => ({
+          ...piece,
+          color: PieceColor.WHITE,
+        }))
+      )
   );
 
   const [selectedPiece, setSelectedPiece] = useState<PositionedPiece | null>(
@@ -55,44 +58,26 @@ export const Gameboard: FunctionComponent = ({}) => {
 
   const possibleNextPositions = useMemo(() => {
     if (!selectedPiece) return [];
-    return getPossibleNextPositions(
-      selectedPiece,
-      whitePieces.concat(blackPieces)
-    );
+    return getPossibleNextPositions(selectedPiece, pieces);
   }, [selectedPiece]);
 
   useEffect(() => {
     console.log(
       "Number of legal next moves:",
       sum(
-        (currentPlayer === PieceColor.WHITE ? whitePieces : blackPieces).map(
-          (piece) =>
-            getPossibleNextPositions(piece, whitePieces.concat(blackPieces))
-              .length
-        )
+        pieces
+          .filter((p) => p.color === currentPlayer)
+          .map((piece) => getPossibleNextPositions(piece, pieces).length)
       )
     );
   }, [currentPlayer]);
 
   function playPosition(x: number, y: number) {
     if (!selectedPiece) return;
-    const [currentPlayerPieces, setCurrentPlayerPieces] =
-      selectedPiece?.color === PieceColor.WHITE
-        ? [whitePieces, setWhitePieces]
-        : [blackPieces, setBlackPieces];
-    const [otherPlayerPieces, setOtherPlayerPieces] =
-      selectedPiece?.color === PieceColor.WHITE
-        ? [blackPieces, setBlackPieces]
-        : [whitePieces, setWhitePieces];
-    let {
-      newCurrent: newCurrentPlayerPieces,
-      newOther: newOtherPlayerPieces,
-      capture,
-    } = updateBoardState(
+    let { newPieces, capture } = updateBoardState(
       selectedPiece,
       { x, y },
-      currentPlayerPieces,
-      otherPlayerPieces
+      pieces
     );
     setMoveHistory((moveHistory) => [
       ...moveHistory,
@@ -106,14 +91,13 @@ export const Gameboard: FunctionComponent = ({}) => {
       },
     ]);
     setSelectedPiece(null);
-    setCurrentPlayerPieces(newCurrentPlayerPieces);
-    setOtherPlayerPieces(newOtherPlayerPieces);
+    setPieces(newPieces);
     // switch player or let bot move
     // TODO: bot can only be black currently
     if (isPlayingAgainstBot) {
       setTimeout(() => {
         const [botSelectedPiece, botTargetPosition] = getNextBotMove(
-          newOtherPlayerPieces.concat(newCurrentPlayerPieces),
+          newPieces,
           PieceColor.BLACK
         );
 
@@ -121,11 +105,9 @@ export const Gameboard: FunctionComponent = ({}) => {
         const updatedBoardState = updateBoardState(
           botSelectedPiece,
           botTargetPosition,
-          newOtherPlayerPieces,
-          newCurrentPlayerPieces
+          newPieces
         );
-        newOtherPlayerPieces = updatedBoardState.newCurrent;
-        newCurrentPlayerPieces = updatedBoardState.newOther;
+        newPieces = updatedBoardState.newPieces;
 
         setMoveHistory((moveHistory) => [
           ...moveHistory,
@@ -138,8 +120,7 @@ export const Gameboard: FunctionComponent = ({}) => {
             check: false, // TODO
           },
         ]);
-        setCurrentPlayerPieces(newCurrentPlayerPieces);
-        setOtherPlayerPieces(newOtherPlayerPieces);
+        setPieces(newPieces);
       }, botDelay);
     } else
       setCurrentPlayer((currentPlayer) =>
@@ -158,13 +139,9 @@ export const Gameboard: FunctionComponent = ({}) => {
             {range(rowLength).map((i) => {
               const x = i + (rowIndex > 5 ? 11 - rowLength : 0);
               const y = x - rowIndex + 5;
-              const whitePiece = whitePieces.find(
+              const piece = pieces.find(
                 (piece) => piece.x === x && piece.y === y
               );
-              const blackPiece = blackPieces.find(
-                (piece) => piece.x === x && piece.y === y
-              );
-              const piece = whitePiece || blackPiece || null;
               const isSelected =
                 selectedPiece?.x === x && selectedPiece?.y === y;
               const isPossibleNextPosition = possibleNextPositions.some(
@@ -212,13 +189,7 @@ export const Gameboard: FunctionComponent = ({}) => {
                           : color
                     }
                     hoverColor={!isSelected}
-                    piece={
-                      whitePiece
-                        ? { type: whitePiece.type, color: PieceColor.WHITE }
-                        : blackPiece
-                          ? { type: blackPiece.type, color: PieceColor.BLACK }
-                          : undefined
-                    }
+                    piece={piece}
                   >
                     {showCoordinateGrid ? `${x} ${rowIndex}` : ""}
                   </Hex>
