@@ -5,7 +5,7 @@ import useWindowDimensions, { Breakpoints } from "../hooks/useWindowDimensions";
 import { ChessPiece, PieceColor } from "../types/ChessPiece";
 import { blackStartPosition, whiteStartPosition } from "../types/startPosition";
 import { getPossibleNextPositions } from "../utilities/getPossibleNextPositions";
-import { getNextBotMove } from "../botLogic.ts/nextMove";
+import { getNextBotMove, isChecked } from "../botLogic.ts/nextMove";
 import { updateBoardState } from "../utilities/updateBoardState";
 import { PositionedPiece } from "../types/positionedPiece";
 import { TailwindColor, tailwindColors } from "../types/tailwindColor";
@@ -88,7 +88,12 @@ export const Gameboard: FunctionComponent = ({}) => {
         color: selectedPiece.color,
         pieceType: selectedPiece.type,
         capture,
-        check: false, // TODO
+        check: isChecked(
+          newPieces,
+          selectedPiece.color === PieceColor.WHITE
+            ? PieceColor.BLACK
+            : PieceColor.WHITE
+        ),
       },
     ]);
     setSelectedPiece(null);
@@ -118,7 +123,12 @@ export const Gameboard: FunctionComponent = ({}) => {
             color: botSelectedPiece.color,
             pieceType: botSelectedPiece.type,
             capture: updatedBoardState.capture,
-            check: false, // TODO
+            check: isChecked(
+              newPieces,
+              botSelectedPiece.color === PieceColor.WHITE
+                ? PieceColor.BLACK
+                : PieceColor.WHITE
+            ),
           },
         ]);
         setPieces(newPieces);

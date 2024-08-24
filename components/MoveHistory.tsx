@@ -26,6 +26,7 @@ export const MoveHistoryDisplay: FunctionComponent<Props> = ({
               {move.capture ? "x" : "-"}
               {xCoordinateLetter(move.to.x)}
               {move.to.y + 1}
+              {move.check ? "+" : ""}
             </div>
           </div>
         );

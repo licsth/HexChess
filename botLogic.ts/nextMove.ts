@@ -11,13 +11,13 @@ import { getAllLegalMoves, getOtherColor, getPossibleNextPositions, simulateMove
  */
 export function getNextBotMove(pieces: PositionedPiece[], botColor: PieceColor): [PositionedPiece, Position] {
   if (isGameOver(pieces, botColor)) {
-    if (isCheked(pieces, botColor)) {
+    if (isChecked(pieces, botColor)) {
       throw new Error("Checkmate (I believe). This is a win screen I guess :)");
     }
     throw new Error("The bot says he cannot move, but is not in check. This counts as 3/4 of a win for you.")
   }
   // TODO: bot should choose which function to use based on difficulty
-  return nMoveLookAhead(pieces, botColor, 2);
+  return oneMoveLookAhead(pieces, botColor);
 }
 
 /**
@@ -84,8 +84,8 @@ function nMoveLookAhead(pieces: PositionedPiece[], botColor: PieceColor, depth: 
  * @param color the color to evaluate for
  */
 function basicEvaluatePosition(pieces: PositionedPiece[], color: PieceColor): number {
-  if (isChekmate(pieces, color)) return -1000;
-  if (isChekmate(pieces, color === PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE)) return 1000;
+  if (isCheckmate(pieces, color)) return -1000;
+  if (isCheckmate(pieces, color === PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE)) return 1000;
   let score = 0;
   for (const piece of pieces) {
     score += piece.color === color ? pieceValue(piece.type) : -pieceValue(piece.type);
@@ -104,14 +104,14 @@ export function isGameOver(pieces: PositionedPiece[], color: PieceColor): boolea
   return pieces.filter((piece) => piece.color === color && getPossibleNextPositions(piece, pieces).length > 0).length === 0;
 }
 
-function isCheked(pieces: PositionedPiece[], color: PieceColor): boolean {
+export function isChecked(pieces: PositionedPiece[], color: PieceColor): boolean {
   const king = pieces.find((piece) => piece.type === ChessPiece.KING && piece.color === color);
   if (!king) return false;
   return pieces.filter((piece) => piece.color !== color).some((piece) => getPossibleNextPositions(piece, pieces, true).some((move) => move.x === king.x && move.y === king.y));
 }
 
-function isChekmate(pieces: PositionedPiece[], color: PieceColor): boolean {
-  return isGameOver(pieces, color) && isCheked(pieces, color);
+function isCheckmate(pieces: PositionedPiece[], color: PieceColor): boolean {
+  return isGameOver(pieces, color) && isChecked(pieces, color);
 }
 
 /**
