@@ -11,10 +11,14 @@ import { PositionedPiece } from "../types/positionedPiece";
 import { TailwindColor, tailwindColors } from "../types/tailwindColor";
 import { getAccentColorForBoardColor } from "../utilities/getAccentForBoardColor";
 import { ColorSelection } from "./ColorSelection";
+import { Position } from "../types/position";
+import { Marking } from "../types/marking";
 
 const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
 const showCoordinateGrid = false;
+const botDelay = 400; // delay of bot's move in ms (so that you can see what it does)
+const trailDuration = 700; // duration of the trail of the bot's move in ms
 
 export const Gameboard: FunctionComponent = ({}) => {
   const [color, setColor] = useState<TailwindColor>("slate");
@@ -23,6 +27,7 @@ export const Gameboard: FunctionComponent = ({}) => {
     () => getAccentColorForBoardColor(color),
     [color]
   );
+  const [markedFields, setMarkedFields] = useState<Marking[]>([]);
 
   const { width } = useWindowDimensions();
   const [currentPlayer, setCurrentPlayer] = useState(PieceColor.WHITE);
@@ -85,18 +90,31 @@ export const Gameboard: FunctionComponent = ({}) => {
     // switch player or let bot move
     // TODO: bot can only be black currently
     if (isPlayingAgainstBot) {
-      const [botSelectedPiece, botTargetPosition] = getNextBotMove(
-        newOtherPlayerPieces.concat(newCurrentPlayerPieces),
-        PieceColor.BLACK
-      );
-      [newOtherPlayerPieces, newCurrentPlayerPieces] = updateBoardState(
-        botSelectedPiece,
-        botTargetPosition,
-        newOtherPlayerPieces,
-        newCurrentPlayerPieces
-      );
-      setCurrentPlayerPieces(newCurrentPlayerPieces);
-      setOtherPlayerPieces(newOtherPlayerPieces);
+      setTimeout(() => {
+        const [botSelectedPiece, botTargetPosition] = getNextBotMove(
+          newOtherPlayerPieces.concat(newCurrentPlayerPieces),
+          PieceColor.BLACK
+        );
+        const id = Date.now();
+        setMarkedFields((fields) => [
+          ...fields,
+          { ...botTargetPosition, id },
+          { ...botSelectedPiece, id },
+        ]);
+        setTimeout(() => {
+          setMarkedFields((fields) =>
+            fields.filter((field) => field.id !== id)
+          );
+        }, trailDuration);
+        [newOtherPlayerPieces, newCurrentPlayerPieces] = updateBoardState(
+          botSelectedPiece,
+          botTargetPosition,
+          newOtherPlayerPieces,
+          newCurrentPlayerPieces
+        );
+        setCurrentPlayerPieces(newCurrentPlayerPieces);
+        setOtherPlayerPieces(newOtherPlayerPieces);
+      }, botDelay);
     } else
       setCurrentPlayer((currentPlayer) =>
         currentPlayer === PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE
@@ -123,6 +141,9 @@ export const Gameboard: FunctionComponent = ({}) => {
               const isPossibleNextPosition = possibleNextPositions.some(
                 (position) => position.x === x && position.y === y
               );
+              const isMarked = markedFields.some(
+                (position) => position.x === x && position.y === y
+              );
               return (
                 <div
                   style={{
@@ -145,7 +166,7 @@ export const Gameboard: FunctionComponent = ({}) => {
                     variant={
                       isSelected
                         ? 600
-                        : isPossibleNextPosition
+                        : isPossibleNextPosition || isMarked
                           ? 400
                           : variantRotation[
                               (rowIndex +
@@ -155,7 +176,9 @@ export const Gameboard: FunctionComponent = ({}) => {
                             ]
                     }
                     color={
-                      isSelected || isPossibleNextPosition ? accentColor : color
+                      isSelected || isPossibleNextPosition || isMarked
+                        ? accentColor
+                        : color
                     }
                     hoverColor={!isSelected}
                     piece={
