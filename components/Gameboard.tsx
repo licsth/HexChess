@@ -104,7 +104,7 @@ export const Gameboard: FunctionComponent = ({}) => {
   }
 
   return (
-    <div className="grid justify-center content-center h-screen bg-slate-800 overflow-hidden relative justify-items-center">
+    <div className="grid justify-center content-center h-screen bg-slate-800 overflow-hidden relative justify-items-center font-mono">
       <div className="relative w-[374px] sm:w-[560px] h-[440px] sm:h-[660px]">
         {rows.map((rowLength, rowIndex) => (
           <div key={rowIndex}>
