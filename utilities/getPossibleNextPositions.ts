@@ -91,3 +91,28 @@ function kingInCheckAfterMove(x: number, y: number, selectedPiece: PositionedPie
   }
   return false;
 }
+
+/**
+ * Returns the new board state after a move
+ * @param selectedPiece the piece to move
+ * @param targetPosition the position to move selectedPiece to
+ * @param pieces all pieces on the board
+ * @returns the new board state after the move
+ */
+export function simulateMove(selectedPiece: PositionedPiece, targetPosition: Position, pieces: PositionedPiece[]): PositionedPiece[] {
+  return pieces.filter((p) => p.x != targetPosition.x || p.y != targetPosition.y) //remove captured piece
+    .map((p) => p === selectedPiece ? { ...p, x: targetPosition.x, y: targetPosition.y } : p) // move piece
+    .map((p) => p.type === ChessPiece.PAWN && // check for promotion
+      ((p.color === PieceColor.WHITE && (p.x === 0 || p.y - p.x === 5))
+        || (p.color === PieceColor.BLACK && (p.x === 10 || p.x - p.y === 5)))
+      ? { ...p, type: ChessPiece.QUEEN } : p);
+}
+
+/**
+ * Returns the color of the other player
+ * @param color the color of the current player
+ * @returns the color of the other player
+ */
+export function getOtherColor(color: PieceColor): PieceColor {
+  return color === PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
+}
