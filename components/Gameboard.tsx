@@ -17,8 +17,7 @@ import { Marking } from "../types/marking";
 const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
 const showCoordinateGrid = false;
-const botDelay = 400; // delay of bot's move in ms (so that you can see what it does)
-const trailDuration = 700; // duration of the trail of the bot's move in ms
+const botDelay = 300; // delay of bot's move in ms (so that you can see what it does)
 
 export const Gameboard: FunctionComponent = ({}) => {
   const [color, setColor] = useState<TailwindColor>("slate");
@@ -96,16 +95,10 @@ export const Gameboard: FunctionComponent = ({}) => {
           PieceColor.BLACK
         );
         const id = Date.now();
-        setMarkedFields((fields) => [
-          ...fields,
+        setMarkedFields([
           { ...botTargetPosition, id },
           { ...botSelectedPiece, id },
         ]);
-        setTimeout(() => {
-          setMarkedFields((fields) =>
-            fields.filter((field) => field.id !== id)
-          );
-        }, trailDuration);
         [newOtherPlayerPieces, newCurrentPlayerPieces] = updateBoardState(
           botSelectedPiece,
           botTargetPosition,
@@ -214,7 +207,6 @@ export const Gameboard: FunctionComponent = ({}) => {
         {range(11).map((i) => {
           const x = Math.min(10, 5 + i);
           const rowIndex = Math.min(10, 15 - i);
-          console.log(x, rowIndex, i);
           return (
             <div
               className="absolute text-white"
