@@ -6,12 +6,12 @@ export function updateBoardState(selectedPiece: PositionedPiece, targetPosition:
   const isWhitePromotionField = targetPosition.x === 0 || targetPosition.y - targetPosition.x === 5;
   const isBlackPromotionField = targetPosition.x - targetPosition.y === 5 || targetPosition.x === 10;
   // move the piece
-  const newCurrentPlayerPIeces = currentPlayerPieces.filter(
+  const newCurrentPlayerPieces = currentPlayerPieces.filter(
     (piece) =>
       piece.x !== selectedPiece.x ||
       piece.y !== selectedPiece.y
   );
-  newCurrentPlayerPIeces.push({
+  newCurrentPlayerPieces.push({
     ...selectedPiece,
     type:
       selectedPiece.type === ChessPiece.PAWN &&
@@ -22,5 +22,9 @@ export function updateBoardState(selectedPiece: PositionedPiece, targetPosition:
     x: targetPosition.x,
     y: targetPosition.y,
   });
-  return [newCurrentPlayerPIeces, otherPlayerPieces.filter((piece) => piece.x !== targetPosition.x || piece.y !== targetPosition.y)]
+  const capture = otherPlayerPieces.some(
+    (piece) =>
+      piece.x === targetPosition.x && piece.y === targetPosition.y
+  );
+  return { newCurrent: newCurrentPlayerPieces, newOther: otherPlayerPieces.filter((piece) => piece.x !== targetPosition.x || piece.y !== targetPosition.y), capture }
 }

@@ -1,4 +1,4 @@
-import { ChessPiece, PieceColor } from "../types/ChessPiece";
+import { ChessPiece, PieceColor, pieceValue } from "../types/ChessPiece";
 import { Position } from "../types/position";
 import { PositionedPiece } from "../types/positionedPiece";
 import { getAllLegalMoves, getPossibleNextPositions } from "../utilities/getPossibleNextPositions";
@@ -74,22 +74,6 @@ function basicEvaluatePosition(pieces: PositionedPiece[], color: PieceColor): nu
   return score;
 }
 
-function pieceValue(type: PositionedPiece["type"]): number {
-  switch (type) {
-    case ChessPiece.PAWN:
-      return 1;
-    case ChessPiece.ROOK:
-      return 5;
-    case ChessPiece.KNIGHT:
-      return 3;
-    case ChessPiece.BISHOP:
-      return 2;
-    case ChessPiece.QUEEN:
-      return 9;
-    default:
-      return 0;
-  }
-}
 
 function canMove(pieces: PositionedPiece[], color: PieceColor): boolean {
   return pieces.filter((piece) => piece.color === color && getPossibleNextPositions(piece, pieces).length > 0).length > 0;

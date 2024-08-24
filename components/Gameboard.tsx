@@ -11,8 +11,10 @@ import { PositionedPiece } from "../types/positionedPiece";
 import { TailwindColor, tailwindColors } from "../types/tailwindColor";
 import { getAccentColorForBoardColor } from "../utilities/getAccentForBoardColor";
 import { ColorSelection } from "./ColorSelection";
-import { Position } from "../types/position";
+import { Position, xCoordinateLetter } from "../types/position";
 import { Marking } from "../types/marking";
+import { MoveHistory } from "../types/moveHistory";
+import { MoveHistoryDisplay } from "./MoveHistory";
 
 const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
@@ -46,6 +48,8 @@ export const Gameboard: FunctionComponent = ({}) => {
     null
   );
 
+  const [moveHistory, setMoveHistory] = useState<MoveHistory[]>([]);
+
   const possibleNextPositions = useMemo(() => {
     if (!selectedPiece) return [];
     return getPossibleNextPositions(
@@ -77,12 +81,27 @@ export const Gameboard: FunctionComponent = ({}) => {
       selectedPiece?.color === PieceColor.WHITE
         ? [blackPieces, setBlackPieces]
         : [whitePieces, setWhitePieces];
-    let [newCurrentPlayerPieces, newOtherPlayerPieces] = updateBoardState(
+    let {
+      newCurrent: newCurrentPlayerPieces,
+      newOther: newOtherPlayerPieces,
+      capture,
+    } = updateBoardState(
       selectedPiece,
       { x, y },
       currentPlayerPieces,
       otherPlayerPieces
     );
+    setMoveHistory((moveHistory) => [
+      ...moveHistory,
+      {
+        from: { x: selectedPiece.x, y: selectedPiece.y },
+        to: { x, y },
+        color: selectedPiece.color,
+        pieceType: selectedPiece.type,
+        capture,
+        check: false, // TODO
+      },
+    ]);
     setSelectedPiece(null);
     setCurrentPlayerPieces(newCurrentPlayerPieces);
     setOtherPlayerPieces(newOtherPlayerPieces);
@@ -94,17 +113,32 @@ export const Gameboard: FunctionComponent = ({}) => {
           newOtherPlayerPieces.concat(newCurrentPlayerPieces),
           PieceColor.BLACK
         );
+
         const id = Date.now();
         setMarkedFields([
           { ...botTargetPosition, id },
           { ...botSelectedPiece, id },
         ]);
-        [newOtherPlayerPieces, newCurrentPlayerPieces] = updateBoardState(
+        const updatedBoardState = updateBoardState(
           botSelectedPiece,
           botTargetPosition,
           newOtherPlayerPieces,
           newCurrentPlayerPieces
         );
+        newOtherPlayerPieces = updatedBoardState.newCurrent;
+        newCurrentPlayerPieces = updatedBoardState.newOther;
+
+        setMoveHistory((moveHistory) => [
+          ...moveHistory,
+          {
+            from: { x: botSelectedPiece.x, y: botSelectedPiece.y },
+            to: botTargetPosition,
+            color: botSelectedPiece.color,
+            pieceType: botSelectedPiece.type,
+            capture: updatedBoardState.capture,
+            check: false, // TODO
+          },
+        ]);
         setCurrentPlayerPieces(newCurrentPlayerPieces);
         setOtherPlayerPieces(newOtherPlayerPieces);
       }, botDelay);
@@ -116,6 +150,9 @@ export const Gameboard: FunctionComponent = ({}) => {
 
   return (
     <div className="grid justify-center content-center h-screen bg-slate-800 overflow-hidden relative justify-items-center font-mono">
+      {width > Breakpoints.MD && (
+        <MoveHistoryDisplay moveHistory={moveHistory} />
+      )}
       <div className="relative w-[374px] sm:w-[560px] h-[440px] sm:h-[660px]">
         {rows.map((rowLength, rowIndex) => (
           <div key={rowIndex}>
@@ -200,7 +237,7 @@ export const Gameboard: FunctionComponent = ({}) => {
               }}
               key={x}
             >
-              {x}
+              {xCoordinateLetter(x)}
             </div>
           );
         })}
@@ -216,7 +253,7 @@ export const Gameboard: FunctionComponent = ({}) => {
               }}
               key={i}
             >
-              {i}
+              {i + 1}
             </div>
           );
         })}
