@@ -6,7 +6,7 @@ export const ColorSelection: FunctionComponent<{
   setColor: (c: TailwindColor) => void;
 }> = ({ setColor }) => {
   return (
-    <div className="flex sm:flex-col sm:absolute right-0 top-0 gap-y-10 pt-5 pr-8 flex-wrap sm:flex-nowrap gap-x-5 justify-center">
+    <div className="flex sm:flex-col sm:absolute right-0 top-0 gap-y-10 pt-8 sm:pr-8 flex-wrap sm:flex-nowrap gap-x-5 justify-center">
       {tailwindColors.map((color) => (
         <div
           key={color}

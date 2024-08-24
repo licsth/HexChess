@@ -14,9 +14,9 @@ import { ColorSelection } from "./ColorSelection";
 
 const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
-const showCoordinates = false;
+const showCoordinateGrid = false;
 
-export const Gameboard: FunctionComponent = ({ }) => {
+export const Gameboard: FunctionComponent = ({}) => {
   const [color, setColor] = useState<TailwindColor>("slate");
   const [isPlayingAgainstBot, setIsPlayingAgainstBot] = useState(true);
   const accentColor = useMemo(
@@ -44,7 +44,10 @@ export const Gameboard: FunctionComponent = ({ }) => {
 
   const possibleNextPositions = useMemo(() => {
     if (!selectedPiece) return [];
-    return getPossibleNextPositions(selectedPiece, whitePieces.concat(blackPieces));
+    return getPossibleNextPositions(
+      selectedPiece,
+      whitePieces.concat(blackPieces)
+    );
   }, [selectedPiece]);
 
   useEffect(() => {
@@ -53,7 +56,8 @@ export const Gameboard: FunctionComponent = ({ }) => {
       sum(
         (currentPlayer === PieceColor.WHITE ? whitePieces : blackPieces).map(
           (piece) =>
-            getPossibleNextPositions(piece, whitePieces.concat(blackPieces)).length
+            getPossibleNextPositions(piece, whitePieces.concat(blackPieces))
+              .length
         )
       )
     );
@@ -82,7 +86,8 @@ export const Gameboard: FunctionComponent = ({ }) => {
     // TODO: bot can only be black currently
     if (isPlayingAgainstBot) {
       const [botSelectedPiece, botTargetPosition] = getNextBotMove(
-        newOtherPlayerPieces.concat(newCurrentPlayerPieces), PieceColor.BLACK
+        newOtherPlayerPieces.concat(newCurrentPlayerPieces),
+        PieceColor.BLACK
       );
       [newOtherPlayerPieces, newCurrentPlayerPieces] = updateBoardState(
         botSelectedPiece,
@@ -122,8 +127,8 @@ export const Gameboard: FunctionComponent = ({ }) => {
                 <div
                   style={{
                     position: "absolute",
-                    top: `${(rowIndex + i + (rowIndex > 5 ? 11 - rowLength : 0)) * rowOffset}px`,
-                    marginLeft: `${(i + (rowIndex > 5 ? 11 - rowLength : 0) - rowIndex) * columnOffset + columnOffset * 5}px`,
+                    top: `${(rowIndex + x) * rowOffset}px`,
+                    marginLeft: `${(x - rowIndex) * columnOffset + columnOffset * 5}px`,
                   }}
                   onClick={() => {
                     if (!isPossibleNextPosition || !selectedPiece)
@@ -143,11 +148,11 @@ export const Gameboard: FunctionComponent = ({ }) => {
                         : isPossibleNextPosition
                           ? 400
                           : variantRotation[
-                          (rowIndex +
-                            i +
-                            (rowIndex > 5 ? 11 - rowLength : 0)) %
-                          3
-                          ]
+                              (rowIndex +
+                                i +
+                                (rowIndex > 5 ? 11 - rowLength : 0)) %
+                                3
+                            ]
                     }
                     color={
                       isSelected || isPossibleNextPosition ? accentColor : color
@@ -161,13 +166,45 @@ export const Gameboard: FunctionComponent = ({ }) => {
                           : undefined
                     }
                   >
-                    {showCoordinates ? `${x} ${y}` : ""}
+                    {showCoordinateGrid ? `${x} ${rowIndex}` : ""}
                   </Hex>
                 </div>
               );
             })}
           </div>
         ))}
+        {range(11).map((x) => {
+          const rowIndex = Math.max(0, x - 5);
+          return (
+            <div
+              className="absolute text-white"
+              style={{
+                top: `${(rowIndex + x) * rowOffset - rowOffset / 3}px`,
+                marginLeft: `${(x - rowIndex) * columnOffset + columnOffset * 5 + 2 * rowOffset}px`,
+              }}
+              key={x}
+            >
+              {x}
+            </div>
+          );
+        })}
+        {range(11).map((i) => {
+          const x = Math.min(10, 5 + i);
+          const rowIndex = Math.min(10, 15 - i);
+          console.log(x, rowIndex, i);
+          return (
+            <div
+              className="absolute text-white"
+              style={{
+                top: `${(rowIndex + x) * rowOffset + columnOffset + 4}px`,
+                marginLeft: `${(x - rowIndex) * columnOffset + columnOffset * 5 + rowOffset - 5}px`,
+              }}
+              key={i}
+            >
+              {i}
+            </div>
+          );
+        })}
       </div>
       <ColorSelection setColor={setColor} />
     </div>
