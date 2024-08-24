@@ -14,7 +14,7 @@ import { ColorSelection } from "./ColorSelection";
 
 const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
-const showCoordinates = true;
+const showCoordinates = false;
 
 export const Gameboard: FunctionComponent = ({ }) => {
   const [color, setColor] = useState<TailwindColor>("slate");
