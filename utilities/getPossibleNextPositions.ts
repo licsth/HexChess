@@ -4,10 +4,11 @@ import { PositionedPiece } from "../types/positionedPiece";
 import { possibleMoves } from "../types/possibleMoves";
 
 /**
- * Returns the possible next positions for a given piece
- * @param selectedPiece The piece to get the next moves for
- * @param whitePieces Current white pieces on the board
- * @param blackPieces Current black pieces on the board
+ * Returns all the possible next positions for the given piece
+ * @param selectedPiece the piece to get the possible next positions for
+ * @param pieces all pieces on the board
+ * @param capturesOnly internal parameter. If true, only capture moves ignoring cheks are returned 
+ * @returns all possible next positions for the given piece
  */
 export function getPossibleNextPositions(selectedPiece: PositionedPiece, pieces: PositionedPiece[], capturesOnly: boolean = false): Position[] {
   const moves = possibleMoves[selectedPiece.type];
@@ -58,13 +59,7 @@ function isFieldOnBoard(x: number, y: number): boolean {
  * @param otherPlayerPieces the other players pieces
  * @returns whether the king is in check after the move
  */
-export function kingInCheckAfterMove(
-  x: number,
-  y: number,
-  selectedPiece: PositionedPiece,
-  ownPieces: PositionedPiece[],
-  otherPlayerPieces: PositionedPiece[],
-): boolean {
+function kingInCheckAfterMove(x: number, y: number, selectedPiece: PositionedPiece, ownPieces: PositionedPiece[], otherPlayerPieces: PositionedPiece[]): boolean {
   const newOwnPieces = ownPieces.map((piece) =>
     piece.x === selectedPiece.x && piece.y === selectedPiece.y ? { ...piece, x, y } : piece
   );
