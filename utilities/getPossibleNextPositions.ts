@@ -46,6 +46,23 @@ export function getPossibleNextPositions(selectedPiece: PositionedPiece, pieces:
   return res;
 }
 
+/**
+ * Returns all legal moves for a given color
+ * @param pieces all pieces on the board
+ * @param color the color to get the legal moves for
+ * @returns all legal moves for the given color
+ */
+export function getAllLegalMoves(pieces: PositionedPiece[], color: PieceColor): [PositionedPiece, Position][] {
+  const ownPieces = pieces.filter((piece) => piece.color === color);
+  const res: [PositionedPiece, Position][] = [];
+  for (const piece of ownPieces) {
+    for (const move of getPossibleNextPositions(piece, pieces)) {
+      res.push([piece, move]);
+    }
+  }
+  return res;
+}
+
 function isFieldOnBoard(x: number, y: number): boolean {
   return y <= x + 5 && y <= 10 && x <= 10 && y >= 0 && x >= 0 && (x <= 5 || y >= x - 5);
 }
