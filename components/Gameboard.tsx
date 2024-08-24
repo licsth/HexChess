@@ -17,6 +17,7 @@ import { ColorSelection } from "./ColorSelection";
 import { Position, xCoordinateLetter } from "../types/position";
 import { MoveHistory } from "../types/moveHistory";
 import { MoveHistoryDisplay } from "./MoveHistory";
+import { CoordinateNumbering } from "./CoordinateNumbering";
 
 const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
@@ -191,44 +192,19 @@ export const Gameboard: FunctionComponent = ({}) => {
                     hoverColor={!isSelected}
                     piece={piece}
                   >
-                    {showCoordinateGrid ? `${x} ${rowIndex}` : ""}
+                    {showCoordinateGrid
+                      ? `${xCoordinateLetter(x)} ${y + 1}`
+                      : ""}
                   </Hex>
                 </div>
               );
             })}
           </div>
         ))}
-        {range(11).map((x) => {
-          const rowIndex = Math.max(0, x - 5);
-          return (
-            <div
-              className="absolute text-white"
-              style={{
-                top: `${(rowIndex + x) * rowOffset - rowOffset / 3}px`,
-                marginLeft: `${(x - rowIndex) * columnOffset + columnOffset * 5 + 2 * rowOffset}px`,
-              }}
-              key={x}
-            >
-              {xCoordinateLetter(x)}
-            </div>
-          );
-        })}
-        {range(11).map((i) => {
-          const x = Math.min(10, 5 + i);
-          const rowIndex = Math.min(10, 15 - i);
-          return (
-            <div
-              className="absolute text-white"
-              style={{
-                top: `${(rowIndex + x) * rowOffset + columnOffset + 4}px`,
-                marginLeft: `${(x - rowIndex) * columnOffset + columnOffset * 5 + rowOffset - 5}px`,
-              }}
-              key={i}
-            >
-              {i + 1}
-            </div>
-          );
-        })}
+        <CoordinateNumbering
+          rowOffset={rowOffset}
+          columnOffset={columnOffset}
+        />
       </div>
       <ColorSelection setColor={setColor} />
     </div>
