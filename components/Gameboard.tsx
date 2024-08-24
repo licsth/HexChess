@@ -9,10 +9,12 @@ import { getNextBotMove } from "../botLogic.ts/nextMove";
 import { updateBoardState } from "../utilities/updateBoardState";
 import { PositionedPiece } from "../types/positionedPiece";
 import { TailwindColor, tailwindColors } from "../types/tailwindColor";
-import { getAccentColorForBoardColor } from "../utilities/getAccentForBoardColor";
+import {
+  getAccentColorForBoardColor,
+  getTrailColorForBoardColor,
+} from "../utilities/getAccentForBoardColor";
 import { ColorSelection } from "./ColorSelection";
 import { Position, xCoordinateLetter } from "../types/position";
-import { Marking } from "../types/marking";
 import { MoveHistory } from "../types/moveHistory";
 import { MoveHistoryDisplay } from "./MoveHistory";
 
@@ -28,7 +30,8 @@ export const Gameboard: FunctionComponent = ({}) => {
     () => getAccentColorForBoardColor(color),
     [color]
   );
-  const [markedFields, setMarkedFields] = useState<Marking[]>([]);
+  const trailColor = useMemo(() => getTrailColorForBoardColor(color), [color]);
+  const [trailFields, setTrailFields] = useState<Position[]>([]);
 
   const { width } = useWindowDimensions();
   const [currentPlayer, setCurrentPlayer] = useState(PieceColor.WHITE);
@@ -114,11 +117,7 @@ export const Gameboard: FunctionComponent = ({}) => {
           PieceColor.BLACK
         );
 
-        const id = Date.now();
-        setMarkedFields([
-          { ...botTargetPosition, id },
-          { ...botSelectedPiece, id },
-        ]);
+        setTrailFields([botTargetPosition, botSelectedPiece]);
         const updatedBoardState = updateBoardState(
           botSelectedPiece,
           botTargetPosition,
@@ -171,7 +170,7 @@ export const Gameboard: FunctionComponent = ({}) => {
               const isPossibleNextPosition = possibleNextPositions.some(
                 (position) => position.x === x && position.y === y
               );
-              const isMarked = markedFields.some(
+              const isTrail = trailFields.some(
                 (position) => position.x === x && position.y === y
               );
               return (
@@ -196,7 +195,7 @@ export const Gameboard: FunctionComponent = ({}) => {
                     variant={
                       isSelected
                         ? 600
-                        : isPossibleNextPosition || isMarked
+                        : isPossibleNextPosition || isTrail
                           ? 400
                           : variantRotation[
                               (rowIndex +
@@ -206,9 +205,11 @@ export const Gameboard: FunctionComponent = ({}) => {
                             ]
                     }
                     color={
-                      isSelected || isPossibleNextPosition || isMarked
+                      isSelected || isPossibleNextPosition
                         ? accentColor
-                        : color
+                        : isTrail
+                          ? trailColor
+                          : color
                     }
                     hoverColor={!isSelected}
                     piece={

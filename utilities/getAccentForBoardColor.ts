@@ -24,3 +24,28 @@ export function getAccentColorForBoardColor(boardColor: TailwindColor): Tailwind
       return "blue";
   }
 }
+
+export function getTrailColorForBoardColor(boardColor: TailwindColor): TailwindColor {
+  switch (boardColor) {
+    case "red":
+      return "yellow";
+    case "slate":
+      return "pink";
+    case "orange":
+      return "pink";
+    case "yellow":
+      return "pink";
+    case "green":
+      return "pink";
+    case "teal":
+      return "pink";
+    case "blue":
+      return "pink";
+    case "indigo":
+      return "pink";
+    case "purple":
+      return "orange";
+    default:
+      return "green";
+  }
+}
