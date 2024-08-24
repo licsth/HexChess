@@ -107,12 +107,3 @@ export function simulateMove(selectedPiece: PositionedPiece, targetPosition: Pos
         || (p.color === PieceColor.BLACK && (p.x === 10 || p.x - p.y === 5)))
       ? { ...p, type: ChessPiece.QUEEN } : p);
 }
-
-/**
- * Returns the color of the other player
- * @param color the color of the current player
- * @returns the color of the other player
- */
-export function getOtherColor(color: PieceColor): PieceColor {
-  return color === PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
-}

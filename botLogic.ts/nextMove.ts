@@ -1,7 +1,7 @@
-import { ChessPiece, PieceColor, pieceValue } from "../types/ChessPiece";
+import { ChessPiece, getOtherColor, PieceColor, pieceValue } from "../types/ChessPiece";
 import { Position } from "../types/position";
 import { PositionedPiece } from "../types/positionedPiece";
-import { getAllLegalMoves, getOtherColor, getPossibleNextPositions, simulateMove } from "../utilities/getPossibleNextPositions";
+import { getAllLegalMoves, getPossibleNextPositions, simulateMove } from "../utilities/getPossibleNextPositions";
 
 /**
  * Calculates the bots next move.
@@ -17,7 +17,7 @@ export function getNextBotMove(pieces: PositionedPiece[], botColor: PieceColor):
     throw new Error("The bot says he cannot move, but is not in check. This counts as 3/4 of a win for you.")
   }
   // TODO: bot should choose which function to use based on difficulty
-  return oneMoveLookAhead(pieces, botColor);
+  return nMoveLookAhead(pieces, botColor, 2);
 }
 
 /**
@@ -40,6 +40,7 @@ function randomMove(pieces: PositionedPiece[], botColor: PieceColor): [Positione
   return [botPiece, move];
 }
 
+// technically, this is encompassed by the nMoveLookAhead function
 function oneMoveLookAhead(pieces: PositionedPiece[], botColor: PieceColor): [PositionedPiece, Position] {
   let bestScore = -2000;
   let bestMove: [PositionedPiece, Position] = [pieces[0], { x: 0, y: 0 }];
@@ -84,8 +85,8 @@ function nMoveLookAhead(pieces: PositionedPiece[], botColor: PieceColor, depth: 
  * @param color the color to evaluate for
  */
 function basicEvaluatePosition(pieces: PositionedPiece[], color: PieceColor): number {
-  if (isCheckmate(pieces, color)) return -1000;
-  if (isCheckmate(pieces, color === PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE)) return 1000;
+  if (isCheckmate(pieces, color)) return -Infinity;
+  if (isCheckmate(pieces, color === PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE)) return Infinity;
   let score = 0;
   for (const piece of pieces) {
     score += piece.color === color ? pieceValue(piece.type) : -pieceValue(piece.type);

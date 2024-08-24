@@ -45,3 +45,7 @@ export enum PieceColor {
   WHITE = 'white',
   BLACK = 'black',
 }
+
+export function getOtherColor(color: PieceColor): PieceColor {
+  return color === PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
+}
