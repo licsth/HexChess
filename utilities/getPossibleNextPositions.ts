@@ -53,9 +53,9 @@ export function getPossibleNextPositions(selectedPiece: PositionedPiece, pieces:
  * @returns all legal moves for the given color
  */
 export function getAllLegalMoves(pieces: PositionedPiece[], color: PieceColor): [PositionedPiece, Position][] {
-  const ownPieces = pieces.filter((piece) => piece.color === color);
   const res: [PositionedPiece, Position][] = [];
-  for (const piece of ownPieces) {
+  for (const piece of pieces) {
+    if (piece.color !== color) continue;
     for (const move of getPossibleNextPositions(piece, pieces)) {
       res.push([piece, move]);
     }

@@ -70,7 +70,7 @@ function nMoveLookAhead(pieces: PositionedPiece[], botColor: PieceColor, depth: 
     const newPieces = simulateMove(piece, move, pieces);
     const score = minimax(newPieces, depth - 1, false, -Infinity, Infinity, botColor);
 
-    if (score >= bestScore && Math.random() > 0.5) {
+    if (score > bestScore || (score >= bestScore && Math.random() > 0.5)) {
       bestScore = score;
       bestMove = [piece, move];
     }
