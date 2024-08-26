@@ -10,12 +10,10 @@ import { possibleMoves } from "../types/possibleMoves";
  * @param capturesOnly internal parameter. If true, only capture moves ignoring cheks are returned 
  * @returns all possible next positions for the given piece
  */
-export function getPossibleNextPositions(selectedPiece: PositionedPiece, pieces: PositionedPiece[], capturesOnly: boolean = false): Position[] {
+export function getPossibleNextPositions(selectedPiece: PositionedPiece, ownPieces: PositionedPiece[], otherPlayerPieces: PositionedPiece[], capturesOnly: boolean = false): Position[] {
   const moves = possibleMoves[selectedPiece.type];
   const sign = selectedPiece.color === PieceColor.WHITE ? 1 : -1;
   const res: Position[] = [];
-  const ownPieces = pieces.filter((piece) => piece.color === selectedPiece.color);
-  const otherPlayerPieces = pieces.filter((piece) => piece.color !== selectedPiece.color);
   for (const moveList of moves) {
     for (const move of moveList) {
       const x = selectedPiece.x + sign * move.x;
@@ -52,11 +50,10 @@ export function getPossibleNextPositions(selectedPiece: PositionedPiece, pieces:
  * @param color the color to get the legal moves for
  * @returns all legal moves for the given color
  */
-export function getAllLegalMoves(pieces: PositionedPiece[], color: PieceColor): [PositionedPiece, Position][] {
-  const ownPieces = pieces.filter((piece) => piece.color === color);
+export function getAllLegalMoves(ownPieces: PositionedPiece[], otherPlayerPieces: PositionedPiece[]): [PositionedPiece, Position][] {
   const res: [PositionedPiece, Position][] = [];
   for (const piece of ownPieces) {
-    for (const move of getPossibleNextPositions(piece, pieces)) {
+    for (const move of getPossibleNextPositions(piece, ownPieces, otherPlayerPieces)) {
       res.push([piece, move]);
     }
   }
@@ -85,7 +82,7 @@ function kingInCheckAfterMove(x: number, y: number, selectedPiece: PositionedPie
   );
   const king = newOwnPieces.find((piece) => piece.type === ChessPiece.KING);
   for (const piece of newOtherPlayerPieces) {
-    if (getPossibleNextPositions(piece, newOwnPieces.concat(newOtherPlayerPieces), true).some((move) => move.x === king?.x && move.y === king?.y)) {
+    if (getPossibleNextPositions(piece, newOtherPlayerPieces, newOwnPieces, true).some((move) => move.x === king?.x && move.y === king?.y)) {
       return true;
     }
   }

@@ -22,7 +22,7 @@ import { CoordinateNumbering } from "./CoordinateNumbering";
 const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
 const showCoordinateGrid = false;
-const botDelay = 300; // delay of bot's move in ms (so that you can see what it does)
+const botDelay = 100; // delay of bot's move in ms (so that you can see what it does)
 
 export const Gameboard: FunctionComponent = ({}) => {
   const [color, setColor] = useState<TailwindColor>("slate");
@@ -102,10 +102,12 @@ export const Gameboard: FunctionComponent = ({}) => {
     // TODO: bot can only be black currently
     if (isPlayingAgainstBot) {
       setTimeout(() => {
+        const startTime = Date.now();
         const [botSelectedPiece, botTargetPosition] = getNextBotMove(
           newPieces,
           PieceColor.BLACK
         );
+        console.log("Bot took", Date.now() - startTime, "ms to move");
 
         setTrailFields([botTargetPosition, botSelectedPiece]);
         const updatedBoardState = updateBoardState(
