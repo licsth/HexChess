@@ -1,4 +1,4 @@
-import { ChessPiece, PieceColor } from "../types/ChessPiece";
+import { ChessPiece, getOtherColor, PieceColor } from "../types/ChessPiece";
 import { Position } from "../types/position";
 import { PositionedPiece } from "../types/positionedPiece";
 import { possibleMoves } from "../types/possibleMoves";
@@ -10,7 +10,7 @@ import { possibleMoves } from "../types/possibleMoves";
  * @param capturesOnly internal parameter. If true, only capture moves ignoring cheks are returned 
  * @returns all possible next positions for the given piece
  */
-export function getPossibleNextPositions(selectedPiece: PositionedPiece, pieces: PositionedPiece[], capturesOnly: boolean = false): Position[] {
+export function getPossibleNextPositions(selectedPiece: PositionedPiece, pieces: PositionedPiece[], fieldColorMap: (PieceColor | null)[], capturesOnly: boolean = false): Position[] {
   const moves = possibleMoves[selectedPiece.type];
   const sign = selectedPiece.color === PieceColor.WHITE ? 1 : -1;
   const res: Position[] = [];
@@ -23,14 +23,12 @@ export function getPossibleNextPositions(selectedPiece: PositionedPiece, pieces:
 
       // move lists are consecutive, meaning that if own piece is in the way/the field is not on the board,
       // the rest of the moveList is invalid
-      if (!isFieldOnBoard(x, y) || ownPieces.some((piece) => piece.x === x && piece.y === y)) {
+      if (!isFieldOnBoard(x, y) || fieldColorMap[x * 11 + y] === selectedPiece.color) {
         break;
       }
       // check if there is an opponent on the field for pawn captures
       const opponentOnField =
-        otherPlayerPieces.some(
-          (piece) => piece.x === x && piece.y === y
-        );
+        fieldColorMap[x * 11 + y] === getOtherColor(selectedPiece.color);
 
       if (
         move.constraint &&
@@ -52,11 +50,11 @@ export function getPossibleNextPositions(selectedPiece: PositionedPiece, pieces:
  * @param color the color to get the legal moves for
  * @returns all legal moves for the given color
  */
-export function getAllLegalMoves(pieces: PositionedPiece[], color: PieceColor): [PositionedPiece, Position][] {
+export function getAllLegalMoves(pieces: PositionedPiece[], fieldColorMap: (PieceColor | null)[], color: PieceColor): [PositionedPiece, Position][] {
   const res: [PositionedPiece, Position][] = [];
   for (const piece of pieces) {
     if (piece.color !== color) continue;
-    for (const move of getPossibleNextPositions(piece, pieces)) {
+    for (const move of getPossibleNextPositions(piece, pieces, fieldColorMap)) {
       res.push([piece, move]);
     }
   }
@@ -83,9 +81,14 @@ function kingInCheckAfterMove(x: number, y: number, selectedPiece: PositionedPie
   const newOtherPlayerPieces = otherPlayerPieces.filter(
     (piece) => piece.x !== x || piece.y !== y
   );
+  const fieldColorMap = new Array(11 * 11).fill(null);
+  for (const piece of newOwnPieces.concat(newOtherPlayerPieces)) {
+    fieldColorMap[piece.x * 11 + piece.y] = piece.color;
+  }
+
   const king = newOwnPieces.find((piece) => piece.type === ChessPiece.KING);
   for (const piece of newOtherPlayerPieces) {
-    if (getPossibleNextPositions(piece, newOwnPieces.concat(newOtherPlayerPieces), true).some((move) => move.x === king?.x && move.y === king?.y)) {
+    if (getPossibleNextPositions(piece, newOwnPieces.concat(newOtherPlayerPieces), fieldColorMap, true).some((move) => move.x === king?.x && move.y === king?.y)) {
       return true;
     }
   }

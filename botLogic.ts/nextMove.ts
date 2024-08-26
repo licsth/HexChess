@@ -1,6 +1,7 @@
 import { ChessPiece, getOtherColor, PieceColor, pieceValue } from "../types/ChessPiece";
 import { Position } from "../types/position";
 import { PositionedPiece } from "../types/positionedPiece";
+import { getFieldColorMap } from "../utilities/getFieldColorMap";
 import { getAllLegalMoves, getPossibleNextPositions, simulateMove } from "../utilities/getPossibleNextPositions";
 
 /**
@@ -10,8 +11,9 @@ import { getAllLegalMoves, getPossibleNextPositions, simulateMove } from "../uti
  * @returns 
  */
 export function getNextBotMove(pieces: PositionedPiece[], botColor: PieceColor): [PositionedPiece, Position] {
-  if (isGameOver(pieces, botColor)) {
-    if (isChecked(pieces, botColor)) {
+  const fieldColorMap = getFieldColorMap(pieces);
+  if (isGameOver(pieces, fieldColorMap, botColor)) {
+    if (isChecked(pieces, fieldColorMap, botColor)) {
       throw new Error("Checkmate (I believe). This is a win screen I guess :)");
     }
     throw new Error("The bot says he cannot move, but is not in check. This counts as 3/4 of a win for you.")
@@ -26,34 +28,34 @@ export function getNextBotMove(pieces: PositionedPiece[], botColor: PieceColor):
  * @param botColor the color the bot is playing as
  * @returns a random legal move for the bot
  */
-function randomMove(pieces: PositionedPiece[], botColor: PieceColor): [PositionedPiece, Position] {
-  let move = undefined;
-  const movableBotPieces = pieces.filter((piece) => piece.color === botColor && getPossibleNextPositions(piece, pieces).length > 0);
-  let botPiece = movableBotPieces[Math.floor(Math.random() * movableBotPieces.length)]
-  while (move === undefined) {
-    botPiece = movableBotPieces[Math.floor(Math.random() * movableBotPieces.length)];
-    const moves = getPossibleNextPositions(botPiece, pieces);
-    if (moves.length > 0) {
-      move = moves[Math.floor(Math.random() * moves.length)];
-    }
-  }
-  return [botPiece, move];
-}
+// function randomMove(pieces: PositionedPiece[], botColor: PieceColor): [PositionedPiece, Position] {
+//   let move = undefined;
+//   const movableBotPieces = pieces.filter((piece) => piece.color === botColor && getPossibleNextPositions(piece, pieces).length > 0);
+//   let botPiece = movableBotPieces[Math.floor(Math.random() * movableBotPieces.length)]
+//   while (move === undefined) {
+//     botPiece = movableBotPieces[Math.floor(Math.random() * movableBotPieces.length)];
+//     const moves = getPossibleNextPositions(botPiece, pieces);
+//     if (moves.length > 0) {
+//       move = moves[Math.floor(Math.random() * moves.length)];
+//     }
+//   }
+//   return [botPiece, move];
+// }
 
 // technically, this is encompassed by the nMoveLookAhead function
-function oneMoveLookAhead(pieces: PositionedPiece[], botColor: PieceColor): [PositionedPiece, Position] {
-  let bestScore = -2000;
-  let bestMove: [PositionedPiece, Position] = [pieces[0], { x: 0, y: 0 }];
-  for (const [piece, move] of getAllLegalMoves(pieces, botColor)) {
-    const newPieces = simulateMove(piece, move, pieces);
-    const score = basicEvaluatePosition(newPieces, botColor);
-    if ((score == bestScore && Math.random() > 0.5) || score > bestScore) {
-      bestScore = score;
-      bestMove = [piece, move];
-    }
-  }
-  return bestMove;
-}
+// function oneMoveLookAhead(pieces: PositionedPiece[], botColor: PieceColor): [PositionedPiece, Position] {
+//   let bestScore = -2000;
+//   let bestMove: [PositionedPiece, Position] = [pieces[0], { x: 0, y: 0 }];
+//   for (const [piece, move] of getAllLegalMoves(pieces, botColor)) {
+//     const newPieces = simulateMove(piece, move, pieces);
+//     const score = basicEvaluatePosition(newPieces, botColor);
+//     if ((score == bestScore && Math.random() > 0.5) || score > bestScore) {
+//       bestScore = score;
+//       bestMove = [piece, move];
+//     }
+//   }
+//   return bestMove;
+// }
 
 /**
  * Performs an n-move lookahead to determine the best move for the bot.
@@ -66,7 +68,9 @@ function nMoveLookAhead(pieces: PositionedPiece[], botColor: PieceColor, depth: 
   let bestScore = -Infinity;
   let bestMove: [PositionedPiece, Position] = [pieces[0], { x: 0, y: 0 }];
 
-  for (const [piece, move] of getAllLegalMoves(pieces, botColor)) {
+  const fieldColorMap = getFieldColorMap(pieces);
+
+  for (const [piece, move] of getAllLegalMoves(pieces, fieldColorMap, botColor)) {
     const newPieces = simulateMove(piece, move, pieces);
     const score = minimax(newPieces, depth - 1, false, -Infinity, Infinity, botColor);
 
@@ -84,9 +88,9 @@ function nMoveLookAhead(pieces: PositionedPiece[], botColor: PieceColor, depth: 
  * @param pieces the pieces on the board
  * @param color the color to evaluate for
  */
-function basicEvaluatePosition(pieces: PositionedPiece[], color: PieceColor): number {
-  if (isCheckmate(pieces, color)) return -Infinity;
-  if (isCheckmate(pieces, color === PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE)) return Infinity;
+function basicEvaluatePosition(pieces: PositionedPiece[], fieldColorMap: (PieceColor | null)[], color: PieceColor): number {
+  if (isCheckmate(pieces, fieldColorMap, color)) return -Infinity;
+  if (isCheckmate(pieces, fieldColorMap, color === PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE)) return Infinity;
   let score = 0;
   for (const piece of pieces) {
     score += piece.color === color ? pieceValue(piece.type) : -pieceValue(piece.type);
@@ -101,18 +105,18 @@ function basicEvaluatePosition(pieces: PositionedPiece[], color: PieceColor): nu
  * @param color the color to move next
  * @returns whether the game is over
  */
-export function isGameOver(pieces: PositionedPiece[], color: PieceColor): boolean {
-  return pieces.filter((piece) => piece.color === color && getPossibleNextPositions(piece, pieces).length > 0).length === 0;
+export function isGameOver(pieces: PositionedPiece[], fieldColorMap: (PieceColor | null)[], color: PieceColor): boolean {
+  return pieces.filter((piece) => piece.color === color && getPossibleNextPositions(piece, pieces, fieldColorMap).length > 0).length === 0;
 }
 
-export function isChecked(pieces: PositionedPiece[], color: PieceColor): boolean {
+export function isChecked(pieces: PositionedPiece[], fieldColorMap: (PieceColor | null)[], color: PieceColor): boolean {
   const king = pieces.find((piece) => piece.type === ChessPiece.KING && piece.color === color);
   if (!king) return false;
-  return pieces.filter((piece) => piece.color !== color).some((piece) => getPossibleNextPositions(piece, pieces, true).some((move) => move.x === king.x && move.y === king.y));
+  return pieces.filter((piece) => piece.color !== color).some((piece) => getPossibleNextPositions(piece, pieces, fieldColorMap, true).some((move) => move.x === king.x && move.y === king.y));
 }
 
-function isCheckmate(pieces: PositionedPiece[], color: PieceColor): boolean {
-  return isGameOver(pieces, color) && isChecked(pieces, color);
+function isCheckmate(pieces: PositionedPiece[], fieldColorMap: (PieceColor | null)[], color: PieceColor): boolean {
+  return isGameOver(pieces, fieldColorMap, color) && isChecked(pieces, fieldColorMap, color);
 }
 
 /**
@@ -128,13 +132,14 @@ function isCheckmate(pieces: PositionedPiece[], color: PieceColor): boolean {
 function minimax(pieces: PositionedPiece[], depth: number, isMaximizing: boolean, alpha: number, beta: number, botColor: PieceColor): number {
   const currentColor = isMaximizing ? botColor : getOtherColor(botColor);
 
-  if (depth === 0 || isGameOver(pieces, currentColor)) {
-    return basicEvaluatePosition(pieces, botColor);
+  const fieldColorMap = getFieldColorMap(pieces);
+  if (depth === 0 || isGameOver(pieces, fieldColorMap, currentColor)) {
+    return basicEvaluatePosition(pieces, fieldColorMap, botColor);
   }
 
   if (isMaximizing) {
     let maxEval = -Infinity;
-    for (const [piece, move] of getAllLegalMoves(pieces, botColor)) {
+    for (const [piece, move] of getAllLegalMoves(pieces, fieldColorMap, botColor)) {
       const newPieces = simulateMove(piece, move, pieces);
       const evaluation = minimax(newPieces, depth - 1, false, alpha, beta, botColor);
       maxEval = Math.max(maxEval, evaluation);
@@ -146,7 +151,7 @@ function minimax(pieces: PositionedPiece[], depth: number, isMaximizing: boolean
     return maxEval;
   } else {
     let minEval = Infinity;
-    for (const [piece, move] of getAllLegalMoves(pieces, getOtherColor(botColor))) {
+    for (const [piece, move] of getAllLegalMoves(pieces, fieldColorMap, getOtherColor(botColor))) {
       const newPieces = simulateMove(piece, move, pieces);
       const evaluation = minimax(newPieces, depth - 1, true, alpha, beta, botColor);
       minEval = Math.min(minEval, evaluation);

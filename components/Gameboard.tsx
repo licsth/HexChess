@@ -18,11 +18,12 @@ import { Position, xCoordinateLetter } from "../types/position";
 import { MoveHistory } from "../types/moveHistory";
 import { MoveHistoryDisplay } from "./MoveHistory";
 import { CoordinateNumbering } from "./CoordinateNumbering";
+import { getFieldColorMap } from "../utilities/getFieldColorMap";
 
 const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
 const showCoordinateGrid = false;
-const botDelay = 300; // delay of bot's move in ms (so that you can see what it does)
+const botDelay = 100; // delay of bot's move in ms (so that you can see what it does)
 
 export const Gameboard: FunctionComponent = ({}) => {
   const [color, setColor] = useState<TailwindColor>("slate");
@@ -59,7 +60,11 @@ export const Gameboard: FunctionComponent = ({}) => {
 
   const possibleNextPositions = useMemo(() => {
     if (!selectedPiece) return [];
-    return getPossibleNextPositions(selectedPiece, pieces);
+    return getPossibleNextPositions(
+      selectedPiece,
+      pieces,
+      getFieldColorMap(pieces)
+    );
   }, [selectedPiece]);
 
   useEffect(() => {
@@ -68,7 +73,11 @@ export const Gameboard: FunctionComponent = ({}) => {
       sum(
         pieces
           .filter((p) => p.color === currentPlayer)
-          .map((piece) => getPossibleNextPositions(piece, pieces).length)
+          .map(
+            (piece) =>
+              getPossibleNextPositions(piece, pieces, getFieldColorMap(pieces))
+                .length
+          )
       )
     );
   }, [currentPlayer]);
@@ -90,6 +99,7 @@ export const Gameboard: FunctionComponent = ({}) => {
         capture,
         check: isChecked(
           newPieces,
+          getFieldColorMap(newPieces),
           selectedPiece.color === PieceColor.WHITE
             ? PieceColor.BLACK
             : PieceColor.WHITE
@@ -102,10 +112,12 @@ export const Gameboard: FunctionComponent = ({}) => {
     // TODO: bot can only be black currently
     if (isPlayingAgainstBot) {
       setTimeout(() => {
+        const startTime = Date.now();
         const [botSelectedPiece, botTargetPosition] = getNextBotMove(
           newPieces,
           PieceColor.BLACK
         );
+        console.log("Bot move took", Date.now() - startTime, "ms");
 
         setTrailFields([botTargetPosition, botSelectedPiece]);
         const updatedBoardState = updateBoardState(
@@ -125,6 +137,7 @@ export const Gameboard: FunctionComponent = ({}) => {
             capture: updatedBoardState.capture,
             check: isChecked(
               newPieces,
+              getFieldColorMap(newPieces),
               botSelectedPiece.color === PieceColor.WHITE
                 ? PieceColor.BLACK
                 : PieceColor.WHITE
