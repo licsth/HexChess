@@ -18,6 +18,7 @@ import { Position, xCoordinateLetter } from "../types/position";
 import { MoveHistory } from "../types/moveHistory";
 import { MoveHistoryDisplay } from "./MoveHistory";
 import { CoordinateNumbering } from "./CoordinateNumbering";
+import { getFieldColorMap } from "../utilities/getFieldColorMap";
 
 const rows = [6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6];
 const variantRotation = [200, 400, 600];
@@ -62,7 +63,8 @@ export const Gameboard: FunctionComponent = ({}) => {
     return getPossibleNextPositions(
       selectedPiece,
       pieces.filter((p) => p.color === selectedPiece.color),
-      pieces.filter((p) => p.color !== selectedPiece.color)
+      pieces.filter((p) => p.color !== selectedPiece.color),
+      getFieldColorMap(pieces)
     );
   }, [selectedPiece]);
 
@@ -77,7 +79,8 @@ export const Gameboard: FunctionComponent = ({}) => {
               getPossibleNextPositions(
                 piece,
                 pieces.filter((p) => p.color === currentPlayer),
-                pieces.filter((p) => p.color !== currentPlayer)
+                pieces.filter((p) => p.color !== currentPlayer),
+                getFieldColorMap(pieces)
               ).length
           )
       )
@@ -101,7 +104,8 @@ export const Gameboard: FunctionComponent = ({}) => {
         capture,
         check: isChecked(
           newPieces.filter((p) => p.color !== selectedPiece.color),
-          newPieces.filter((p) => p.color === selectedPiece.color)
+          newPieces.filter((p) => p.color === selectedPiece.color),
+          getFieldColorMap(newPieces)
         ),
       },
     ]);
@@ -136,7 +140,8 @@ export const Gameboard: FunctionComponent = ({}) => {
             capture: updatedBoardState.capture,
             check: isChecked(
               newPieces.filter((p) => p.color !== selectedPiece.color),
-              newPieces.filter((p) => p.color === selectedPiece.color)
+              newPieces.filter((p) => p.color === selectedPiece.color),
+              getFieldColorMap(newPieces)
             ),
           },
         ]);
