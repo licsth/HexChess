@@ -59,7 +59,11 @@ export const Gameboard: FunctionComponent = ({}) => {
 
   const possibleNextPositions = useMemo(() => {
     if (!selectedPiece) return [];
-    return getPossibleNextPositions(selectedPiece, pieces);
+    return getPossibleNextPositions(
+      selectedPiece,
+      pieces.filter((p) => p.color === selectedPiece.color),
+      pieces.filter((p) => p.color !== selectedPiece.color)
+    );
   }, [selectedPiece]);
 
   useEffect(() => {
@@ -68,7 +72,14 @@ export const Gameboard: FunctionComponent = ({}) => {
       sum(
         pieces
           .filter((p) => p.color === currentPlayer)
-          .map((piece) => getPossibleNextPositions(piece, pieces).length)
+          .map(
+            (piece) =>
+              getPossibleNextPositions(
+                piece,
+                pieces.filter((p) => p.color === currentPlayer),
+                pieces.filter((p) => p.color !== currentPlayer)
+              ).length
+          )
       )
     );
   }, [currentPlayer]);
@@ -89,10 +100,8 @@ export const Gameboard: FunctionComponent = ({}) => {
         pieceType: selectedPiece.type,
         capture,
         check: isChecked(
-          newPieces,
-          selectedPiece.color === PieceColor.WHITE
-            ? PieceColor.BLACK
-            : PieceColor.WHITE
+          newPieces.filter((p) => p.color !== selectedPiece.color),
+          newPieces.filter((p) => p.color === selectedPiece.color)
         ),
       },
     ]);
@@ -126,10 +135,8 @@ export const Gameboard: FunctionComponent = ({}) => {
             pieceType: botSelectedPiece.type,
             capture: updatedBoardState.capture,
             check: isChecked(
-              newPieces,
-              botSelectedPiece.color === PieceColor.WHITE
-                ? PieceColor.BLACK
-                : PieceColor.WHITE
+              newPieces.filter((p) => p.color !== selectedPiece.color),
+              newPieces.filter((p) => p.color === selectedPiece.color)
             ),
           },
         ]);

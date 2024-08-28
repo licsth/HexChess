@@ -10,14 +10,16 @@ import { getAllLegalMoves, getOtherColor, getPossibleNextPositions, simulateMove
  * @returns 
  */
 export function getNextBotMove(pieces: PositionedPiece[], botColor: PieceColor): [PositionedPiece, Position] {
-  if (isGameOver(pieces, botColor)) {
-    if (isChecked(pieces, botColor)) {
+  const botPieces = pieces.filter((piece) => piece.color === botColor);
+  const otherPlayerPieces = pieces.filter((piece) => piece.color !== botColor);
+  if (isGameOver(botPieces, otherPlayerPieces)) {
+    if (isChecked(botPieces, otherPlayerPieces)) {
       throw new Error("Checkmate (I believe). This is a win screen I guess :)");
     }
     throw new Error("The bot says he cannot move, but is not in check. This counts as 3/4 of a win for you.")
   }
   // TODO: bot should choose which function to use based on difficulty
-  return nMoveLookAhead(pieces, botColor, 2);
+  return nMoveLookAhead(botPieces, otherPlayerPieces, 2);
 }
 
 /**
@@ -63,14 +65,12 @@ function randomMove(pieces: PositionedPiece[], botColor: PieceColor): [Positione
  * @param depth The depth of the lookahead (number of moves).
  * @returns The best move as a tuple [PositionedPiece, Position].
  */
-function nMoveLookAhead(pieces: PositionedPiece[], botColor: PieceColor, depth: number): [PositionedPiece, Position] {
+function nMoveLookAhead(botPieces: PositionedPiece[], otherPlayerPieces: PositionedPiece[], depth: number): [PositionedPiece, Position] {
   let bestScore = -Infinity;
-  let bestMove: [PositionedPiece, Position] = [pieces[0], { x: 0, y: 0 }];
-  const ownPieces = pieces.filter((piece) => piece.color === botColor);
-  const otherPlayerPieces = pieces.filter((piece) => piece.color !== botColor);
-  for (const [piece, move] of getAllLegalMoves(ownPieces, otherPlayerPieces)) {
-    const newPieces = simulateMove(piece, move, pieces);
-    const score = minimax(newPieces, depth - 1, false, -Infinity, Infinity, botColor);
+  let bestMove: [PositionedPiece, Position] = [botPieces[0], { x: 0, y: 0 }];
+  for (const [piece, move] of getAllLegalMoves(botPieces, otherPlayerPieces)) {
+    const [newBot, newOther] = simulateMove(piece, move, botPieces, otherPlayerPieces);
+    const score = minimax(newBot, newOther, depth - 1, false, -Infinity, Infinity);
 
     if (score >= bestScore && Math.random() > 0.5) {
       bestScore = score;
@@ -130,8 +130,7 @@ function isCheckmate(ownPieces: PositionedPiece[], otherPlayerPieces: Positioned
  * @param botColor The bot's color.
  * @returns The evaluation score of the board.
  */
-function minimax(botPieces: PositionedPiece[], playerPieces: PositionedPiece[], depth: number, isMaximizing: boolean, alpha: number, beta: number, botColor: PieceColor): number {
-  const currentColor = isMaximizing ? botColor : getOtherColor(botColor);
+function minimax(botPieces: PositionedPiece[], playerPieces: PositionedPiece[], depth: number, isMaximizing: boolean, alpha: number, beta: number): number {
 
   if (depth === 0 || isGameOver(isMaximizing ? botPieces : playerPieces, isMaximizing ? playerPieces : botPieces)) {
     return basicEvaluatePosition(botPieces, playerPieces);
@@ -140,8 +139,8 @@ function minimax(botPieces: PositionedPiece[], playerPieces: PositionedPiece[], 
   if (isMaximizing) {
     let maxEval = -Infinity;
     for (const [piece, move] of getAllLegalMoves(botPieces, playerPieces)) {
-      const newPieces = simulateMove(piece, move, botPieces);
-      const evaluation = minimax(newPieces, depth - 1, false, alpha, beta, botColor);
+      const [newBot, newPlayer] = simulateMove(piece, move, botPieces, playerPieces);
+      const evaluation = minimax(newBot, newPlayer, depth - 1, false, alpha, beta);
       maxEval = Math.max(maxEval, evaluation);
       alpha = Math.max(alpha, evaluation);
       if (beta <= alpha) {
@@ -151,9 +150,9 @@ function minimax(botPieces: PositionedPiece[], playerPieces: PositionedPiece[], 
     return maxEval;
   } else {
     let minEval = Infinity;
-    for (const [piece, move] of getAllLegalMoves(pieces, getOtherColor(botColor))) {
-      const newPieces = simulateMove(piece, move, pieces);
-      const evaluation = minimax(newPieces, depth - 1, true, alpha, beta, botColor);
+    for (const [piece, move] of getAllLegalMoves(playerPieces, botPieces)) {
+      const [newPlayer, newBot] = simulateMove(piece, move, playerPieces, botPieces);
+      const evaluation = minimax(newBot, newPlayer, depth - 1, true, alpha, beta);
       minEval = Math.min(minEval, evaluation);
       beta = Math.min(beta, evaluation);
       if (beta <= alpha) {

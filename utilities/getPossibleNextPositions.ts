@@ -96,13 +96,14 @@ function kingInCheckAfterMove(x: number, y: number, selectedPiece: PositionedPie
  * @param pieces all pieces on the board
  * @returns the new board state after the move
  */
-export function simulateMove(selectedPiece: PositionedPiece, targetPosition: Position, pieces: PositionedPiece[]): PositionedPiece[] {
-  return pieces.filter((p) => p.x != targetPosition.x || p.y != targetPosition.y) //remove captured piece
-    .map((p) => p === selectedPiece ? { ...p, x: targetPosition.x, y: targetPosition.y } : p) // move piece
+export function simulateMove(selectedPiece: PositionedPiece, targetPosition: Position, ownPieces: PositionedPiece[], otherPlayerPieces: PositionedPiece[]): PositionedPiece[][] {
+  const newOther = otherPlayerPieces.filter((p) => p.x != targetPosition.x || p.y != targetPosition.y) //remove captured piece
+  const newOwn = ownPieces.map((p) => p === selectedPiece ? { ...p, x: targetPosition.x, y: targetPosition.y } : p) // move piece
     .map((p) => p.type === ChessPiece.PAWN && // check for promotion
       ((p.color === PieceColor.WHITE && (p.x === 0 || p.y - p.x === 5))
         || (p.color === PieceColor.BLACK && (p.x === 10 || p.x - p.y === 5)))
       ? { ...p, type: ChessPiece.QUEEN } : p);
+  return [newOwn, newOther];
 }
 
 /**
