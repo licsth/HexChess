@@ -73,7 +73,10 @@ function nMoveLookAhead(botPieces: PositionedPiece[], otherPlayerPieces: Positio
   const fieldColorMap = getFieldColorMap(botPieces.concat(otherPlayerPieces));
   for (const [piece, move] of getAllLegalMoves(botPieces, otherPlayerPieces, fieldColorMap)) {
     const [newBot, newOther] = simulateMove(piece, move, botPieces, otherPlayerPieces);
-    const score = minimax(newBot, newOther, depth - 1, false, -Infinity, Infinity);
+    const newFieldColorMap = fieldColorMap.slice();
+    newFieldColorMap[piece.x * 11 + piece.y] = null;
+    newFieldColorMap[move.x * 11 + move.y] = piece.color;
+    const score = minimax(newBot, newOther, newFieldColorMap, depth - 1, false, -Infinity, Infinity);
 
     if (score > bestScore || (score >= bestScore && Math.random() > 0.5)) {
       bestScore = score;
@@ -133,9 +136,8 @@ function isCheckmate(ownPieces: PositionedPiece[], otherPlayerPieces: Positioned
  * @param botColor The bot's color.
  * @returns The evaluation score of the board.
  */
-function minimax(botPieces: PositionedPiece[], playerPieces: PositionedPiece[], depth: number, isMaximizing: boolean, alpha: number, beta: number): number {
+function minimax(botPieces: PositionedPiece[], playerPieces: PositionedPiece[], fieldColorMap: (PieceColor | null)[], depth: number, isMaximizing: boolean, alpha: number, beta: number): number {
 
-  const fieldColorMap = getFieldColorMap(botPieces.concat(playerPieces));
   if (depth === 0 || isGameOver(isMaximizing ? botPieces : playerPieces, isMaximizing ? playerPieces : botPieces, fieldColorMap)) {
     return basicEvaluatePosition(botPieces, playerPieces, fieldColorMap);
   }
@@ -144,7 +146,10 @@ function minimax(botPieces: PositionedPiece[], playerPieces: PositionedPiece[], 
     let maxEval = -Infinity;
     for (const [piece, move] of getAllLegalMoves(botPieces, playerPieces, fieldColorMap)) {
       const [newBot, newPlayer] = simulateMove(piece, move, botPieces, playerPieces);
-      const evaluation = minimax(newBot, newPlayer, depth - 1, false, alpha, beta);
+      const newFieldColorMap = fieldColorMap.slice();
+      newFieldColorMap[piece.x * 11 + piece.y] = null;
+      newFieldColorMap[move.x * 11 + move.y] = piece.color;
+      const evaluation = minimax(newBot, newPlayer, newFieldColorMap, depth - 1, false, alpha, beta);
       maxEval = Math.max(maxEval, evaluation);
       alpha = Math.max(alpha, evaluation);
       if (beta <= alpha) {
@@ -156,7 +161,10 @@ function minimax(botPieces: PositionedPiece[], playerPieces: PositionedPiece[], 
     let minEval = Infinity;
     for (const [piece, move] of getAllLegalMoves(playerPieces, botPieces, fieldColorMap)) {
       const [newPlayer, newBot] = simulateMove(piece, move, playerPieces, botPieces);
-      const evaluation = minimax(newBot, newPlayer, depth - 1, true, alpha, beta);
+      const newFieldColorMap = fieldColorMap.slice();
+      newFieldColorMap[piece.x * 11 + piece.y] = null;
+      newFieldColorMap[move.x * 11 + move.y] = piece.color;
+      const evaluation = minimax(newBot, newPlayer, newFieldColorMap, depth - 1, true, alpha, beta);
       minEval = Math.min(minEval, evaluation);
       beta = Math.min(beta, evaluation);
       if (beta <= alpha) {
