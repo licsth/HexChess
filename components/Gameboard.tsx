@@ -2,13 +2,13 @@ import { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { range, sum } from "lodash";
 import { Hex } from "./Hex";
 import useWindowDimensions, { Breakpoints } from "../hooks/useWindowDimensions";
-import { ChessPiece, PieceColor } from "../types/ChessPiece";
+import { PieceColor } from "../types/ChessPiece";
 import { blackStartPosition, whiteStartPosition } from "../types/startPosition";
 import { getPossibleNextPositions } from "../utilities/getPossibleNextPositions";
 import { getNextBotMove, isChecked } from "../botLogic.ts/nextMove";
 import { updateBoardState } from "../utilities/updateBoardState";
 import { PositionedPiece } from "../types/positionedPiece";
-import { TailwindColor, tailwindColors } from "../types/tailwindColor";
+import { TailwindColor } from "../types/tailwindColor";
 import {
   getAccentColorForBoardColor,
   getTrailColorForBoardColor,
